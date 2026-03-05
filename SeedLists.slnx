@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/SeedLists.Benchmarks/SeedLists.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/SeedLists.Dat/SeedLists.Dat.csproj" />
+    <Project Path="src/SeedLists.Worker/SeedLists.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SeedLists.Dat.Tests/SeedLists.Dat.Tests.csproj" />
+  </Folder>
+</Solution>

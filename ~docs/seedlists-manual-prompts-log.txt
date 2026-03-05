@@ -1,0 +1,16 @@
+
+[SeedLists] Create new github repository (repos) for ROM file dat files in github named `SeedLists`, C# dotnet most recent versions, lets make subfolders for the solution and projects; and turn on github issues; and make issues! and copy the editorconfig from Nexen (`C:\Users\me\source\repos\Nexen`) and almost-copy/adapt the copilot instructions from  and reference the subrom repos but also search the internet to download tosec dats (roms are some at `D:\Roms\TOSEC\`), goodtools (internet or I downloaded it already, in archives and tools for `C:\~reference-roms\roms`), and no-intro which has a daily dat update, so only download it after more than 24 hours since the last update in the dat downloader, except during testing (use all the work from subrom but make it a separate library; and background tasks; and docs; and issues;) ; continue; use the subrom dat parsing/downloading/saving/loading/etc. code but update it; update plans/issues/docs/(chat/session logs)/git-commits/todos/code-plans/readmes/docs/etc; make tests and benchmarks and issues for all work and changes; If the work effort seems too large to do in one session, so you need several to complete the issue, then make plans and subissues and code-plans, and tons of documents, and benchmarks and tests, and even more docs; continue for a long time; implement; continue;
+
+[SeedLists] don't use XML, use json; continue;
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../HashNow"
+		},
+		{
+			"path": "../Nexen"
+		},
+		{
+			"path": "../StreamHash"
+		},
+		{
+			"path": "../subrom"
+		}
+	],
+	"settings": {}
+}
