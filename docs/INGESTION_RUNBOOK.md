@@ -16,6 +16,13 @@ Issue: `#10`
 & "C:\Program Files\dotnet\dotnet.exe" run --project src/SeedLists.Worker
 ```
 
+### Reliability Settings
+
+- `Worker:MaxRetryAttempts`: retries per provider before hard failure.
+- `Worker:RetryDelaySeconds`: delay between retry attempts.
+- `Worker:StopCycleOnProviderFailure`: stop remaining providers in the cycle when one provider fails.
+- `Worker:EmitCycleSummary`: writes cycle-level telemetry summary logs.
+
 ## Internet Download Safety
 
 - Keep `SeedListsDat:EnableInternetDownloads` disabled by default.
