@@ -11,10 +11,12 @@ namespace SeedLists.Dat.Services;
 public sealed class DatCollectionService(
 	IEnumerable<IDatProvider> providers,
 	IDatParserFactory parserFactory,
+	ICatalogNormalizationService normalizationService,
 	ICatalogValidationService validationService,
 	IOptions<SeedListsDatOptions> options) : IDatCollectionService {
 	private readonly IReadOnlyList<IDatProvider> _providers = providers.ToList();
 	private readonly IDatParserFactory _parserFactory = parserFactory;
+	private readonly ICatalogNormalizationService _normalizationService = normalizationService;
 	private readonly ICatalogValidationService _validationService = validationService;
 	private readonly SeedListsDatOptions _options = options.Value;
 
@@ -62,8 +64,9 @@ public sealed class DatCollectionService(
 				await using var buffer = new MemoryStream();
 				await source.CopyToAsync(buffer, cancellationToken);
 				buffer.Position = 0;
+				var sourceBytes = buffer.ToArray();
+				var payloadBytes = _normalizationService.Normalize(sourceBytes, provider, metadata.Name);
 
-				var payloadBytes = buffer.ToArray();
 				var validation = _validationService.Validate(payloadBytes);
 				if (!validation.IsValid) {
 					throw new InvalidOperationException($"Catalog validation failed: {string.Join(" | ", validation.Errors)}");

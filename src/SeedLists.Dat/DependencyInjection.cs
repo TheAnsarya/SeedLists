@@ -16,6 +16,7 @@ public static class DependencyInjection {
 		services.Configure<SeedListsDatOptions>(configuration.GetSection("SeedListsDat"));
 		services.AddHttpClient();
 
+		services.AddSingleton<ICatalogNormalizationService, CatalogNormalizationService>();
 		services.AddSingleton<IDatSyncStateStore, FileDatSyncStateStore>();
 		services.AddSingleton<ICatalogValidationService, CatalogValidationService>();
 		services.AddSingleton<IDatParser, StreamingJsonDatParser>();
