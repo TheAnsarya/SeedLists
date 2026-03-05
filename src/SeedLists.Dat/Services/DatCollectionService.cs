@@ -11,9 +11,11 @@ namespace SeedLists.Dat.Services;
 public sealed class DatCollectionService(
 	IEnumerable<IDatProvider> providers,
 	IDatParserFactory parserFactory,
+	ICatalogValidationService validationService,
 	IOptions<SeedListsDatOptions> options) : IDatCollectionService {
 	private readonly IReadOnlyList<IDatProvider> _providers = providers.ToList();
 	private readonly IDatParserFactory _parserFactory = parserFactory;
+	private readonly ICatalogValidationService _validationService = validationService;
 	private readonly SeedListsDatOptions _options = options.Value;
 
 	public async Task<DatSyncReport> SyncProviderAsync(
@@ -61,9 +63,15 @@ public sealed class DatCollectionService(
 				await source.CopyToAsync(buffer, cancellationToken);
 				buffer.Position = 0;
 
+				var payloadBytes = buffer.ToArray();
+				var validation = _validationService.Validate(payloadBytes);
+				if (!validation.IsValid) {
+					throw new InvalidOperationException($"Catalog validation failed: {string.Join(" | ", validation.Errors)}");
+				}
+
 				var rawName = SafeFileName(metadata.Name);
 				var rawPath = Path.Combine(providerOutputDir, $"{rawName}.dat");
-				await File.WriteAllBytesAsync(rawPath, buffer.ToArray(), cancellationToken);
+				await File.WriteAllBytesAsync(rawPath, payloadBytes, cancellationToken);
 
 				progress?.Report(new DatSyncProgress {
 					Provider = provider,

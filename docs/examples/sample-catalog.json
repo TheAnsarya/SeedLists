@@ -1,0 +1,25 @@
+{
+	"name": "Sample DAT Catalog",
+	"description": "Reference sample for SeedLists schema validation",
+	"version": "2026-03-05",
+	"provider": "Tosec",
+	"system": "Nintendo",
+	"games": [
+		{
+			"name": "Example Game",
+			"description": "Demo",
+			"publisher": "Example Publisher",
+			"year": "1991",
+			"roms": [
+				{
+					"name": "example.bin",
+					"size": 1024,
+					"crc32": "abcdef12",
+					"md5": "0123456789abcdef0123456789abcdef",
+					"sha1": "0123456789abcdef0123456789abcdef01234567",
+					"status": "good"
+				}
+			]
+		}
+	]
+}

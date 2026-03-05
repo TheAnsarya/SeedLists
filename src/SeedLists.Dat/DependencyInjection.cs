@@ -17,6 +17,7 @@ public static class DependencyInjection {
 		services.AddHttpClient();
 
 		services.AddSingleton<IDatSyncStateStore, FileDatSyncStateStore>();
+		services.AddSingleton<ICatalogValidationService, CatalogValidationService>();
 		services.AddSingleton<IDatParser, StreamingJsonDatParser>();
 		services.AddSingleton<IDatParserFactory, DatParserFactory>();
 		services.AddSingleton<IDatProvider, TosecProvider>();
