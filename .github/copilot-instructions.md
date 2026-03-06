@@ -40,3 +40,9 @@ Primary goals:
 2. Implement with tests and benchmarks where practical.
 3. Update docs and session logs in `~docs/`.
 4. Use conventional commits.
+
+## Manual Prompt Log Policy
+
+- `~docs\seedlists-manual-prompts-log.txt` is user-owned and user-edited.
+- AI agents must never modify this file, including during restore/revert operations.
+- Always include this file in commits when it has user changes.
