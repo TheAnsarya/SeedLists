@@ -1,6 +1,6 @@
 # JSON Schema
 
-Issue: `#8`
+Issue: `#2`
 
 SeedLists uses a canonical JSON catalog schema for normalized DAT payloads.
 
@@ -8,6 +8,13 @@ SeedLists uses a canonical JSON catalog schema for normalized DAT payloads.
 
 - Source: `src/SeedLists.Dat/Schemas/seedlists.catalog.schema.json`
 - Example payload: `docs/examples/sample-catalog.json`
+- Contract tests: `tests/SeedLists.Dat.Tests/CatalogSchemaContractTests.cs`
+
+## Conversion Strategy
+
+- Canonical mapping contract: `docs/CONVERSION_STRATEGY.md`
+- Provider mapping specifics: `docs/PROVIDER_MAPPINGS.md`
+- Malformed fallback strategy: `docs/MALFORMED_FIXTURE_STRATEGY.md`
 
 ## Required Root Fields
 

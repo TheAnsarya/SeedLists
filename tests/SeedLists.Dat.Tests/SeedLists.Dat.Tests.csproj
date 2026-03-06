@@ -24,6 +24,8 @@
 
   <ItemGroup>
 	<Content Include="Fixtures\*.*" CopyToOutputDirectory="PreserveNewest" />
+  <Content Include="..\..\src\SeedLists.Dat\Schemas\seedlists.catalog.schema.json" Link="Schemas\seedlists.catalog.schema.json" CopyToOutputDirectory="PreserveNewest" />
+  <Content Include="..\..\docs\examples\sample-catalog.json" Link="Examples\sample-catalog.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
