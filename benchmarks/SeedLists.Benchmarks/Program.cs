@@ -5,6 +5,7 @@ using SeedLists.Dat.Models;
 using SeedLists.Dat.Parsing;
 using SeedLists.Dat.Services;
 using System.Text;
+using System.Text.Json;
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
@@ -12,40 +13,68 @@ BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
 public class JsonDatParserBenchmark {
 	private readonly StreamingJsonDatParser _parser = new();
-	private readonly byte[] _datBytes = BuildDat();
+	private readonly byte[] _smallDatBytes = BuildDat(gameCount: 1, romsPerGame: 1);
+	private readonly byte[] _mediumDatBytes = BuildDat(gameCount: 80, romsPerGame: 4);
+	private readonly byte[] _largeDatBytes = BuildDat(gameCount: 400, romsPerGame: 6);
 
-	[Benchmark]
+	[Benchmark(Baseline = true)]
 	public async Task ParseSmallDatAsync() {
-		await using var stream = new MemoryStream(_datBytes, writable: false);
-		_ = await _parser.ParseAsync(stream, "benchmark.json");
+		await ParsePayloadAsync(_smallDatBytes, "benchmark-small.json");
 	}
 
-	private static byte[] BuildDat() {
-		var json = """
-			{
-				"name": "Benchmark DAT",
-				"description": "SeedLists benchmark payload",
-				"version": "2026-03-05",
-				"provider": "Tosec",
-				"games": [
-					{
-						"name": "Example Game",
-						"description": "Example Game",
-						"roms": [
-							{
-								"name": "example.bin",
-								"size": 1234,
-								"crc32": "ABCDEF12",
-								"md5": "AABB",
-								"sha1": "CCDDEE"
-							}
-						]
-					}
-				]
-			}
-			""";
+	[Benchmark]
+	public async Task ParseMediumDatAsync() {
+		await ParsePayloadAsync(_mediumDatBytes, "benchmark-medium.json");
+	}
 
-		return System.Text.Encoding.UTF8.GetBytes(json);
+	[Benchmark]
+	public async Task ParseLargeDatAsync() {
+		await ParsePayloadAsync(_largeDatBytes, "benchmark-large.json");
+	}
+
+	private async Task ParsePayloadAsync(byte[] payload, string fileName) {
+		await using var stream = new MemoryStream(payload, writable: false);
+		_ = await _parser.ParseAsync(stream, fileName);
+	}
+
+	private static byte[] BuildDat(int gameCount, int romsPerGame) {
+		using var stream = new MemoryStream();
+		using var writer = new Utf8JsonWriter(stream);
+
+		writer.WriteStartObject();
+		writer.WriteString("name", $"Benchmark DAT {gameCount}x{romsPerGame}");
+		writer.WriteString("description", "SeedLists parser benchmark payload");
+		writer.WriteString("version", "2026-03-06");
+		writer.WriteString("provider", "Tosec");
+		writer.WriteStartArray("games");
+
+		for (var game = 1; game <= gameCount; game++) {
+			writer.WriteStartObject();
+			writer.WriteString("name", $"Game {game:0000}");
+			writer.WriteString("description", $"Benchmark Game {game:0000}");
+			writer.WriteString("publisher", "SeedLists");
+			writer.WriteString("year", (1980 + (game % 30)).ToString());
+			writer.WriteStartArray("roms");
+
+			for (var rom = 1; rom <= romsPerGame; rom++) {
+				writer.WriteStartObject();
+				writer.WriteString("name", $"game-{game:0000}-rom-{rom:00}.bin");
+				writer.WriteNumber("size", 16384 + (rom * 128));
+				writer.WriteString("crc32", $"{game:x4}{rom:x4}");
+				writer.WriteString("md5", $"{game:x8}{rom:x8}{game:x8}{rom:x8}");
+				writer.WriteString("sha1", $"{game:x8}{rom:x8}{game:x8}{rom:x8}{game:x8}");
+				writer.WriteEndObject();
+			}
+
+			writer.WriteEndArray();
+			writer.WriteEndObject();
+		}
+
+		writer.WriteEndArray();
+		writer.WriteEndObject();
+		writer.Flush();
+
+		return stream.ToArray();
 	}
 }
 
