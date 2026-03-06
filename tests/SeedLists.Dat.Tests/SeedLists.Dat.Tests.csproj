@@ -22,4 +22,8 @@
     <ProjectReference Include="..\..\src\SeedLists.Dat\SeedLists.Dat.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<Content Include="Fixtures\*.*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

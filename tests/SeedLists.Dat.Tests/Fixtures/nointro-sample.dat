@@ -1,0 +1,8 @@
+<datafile>
+	<game name="Sample NoIntro Game">
+		<description>Sample NoIntro Description</description>
+		<manufacturer>NoIntro Publisher</manufacturer>
+		<year>1998</year>
+		<rom name="sample-nointro.bin" size="2048" crc="abcdef12" md5="fedcba9876543210fedcba9876543210" sha1="89abcdef0123456789abcdef0123456789abcdef" status="verified" />
+	</game>
+</datafile>

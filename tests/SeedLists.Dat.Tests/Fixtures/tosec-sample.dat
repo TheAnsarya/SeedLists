@@ -1,0 +1,11 @@
+<datafile>
+	<header>
+		<name>TOSEC Sample</name>
+	</header>
+	<game name="Sample TOSEC Game">
+		<description>Sample TOSEC Description</description>
+		<manufacturer>TOSEC Publisher</manufacturer>
+		<year>1994</year>
+		<rom name="sample-tosec.bin" size="4096" crc="deadbeef" md5="0123456789abcdef0123456789abcdef" sha1="0123456789abcdef0123456789abcdef01234567" status="good" />
+	</game>
+</datafile>

@@ -78,4 +78,39 @@ public sealed class CatalogNormalizationServiceTests {
 		Assert.Equal("GoodTools", root.GetProperty("provider").GetString());
 		Assert.True(root.GetProperty("games").GetArrayLength() >= 2);
 	}
+
+	[Theory]
+	[InlineData("tosec-sample.dat", DatProviderKind.Tosec, "Sample TOSEC Game", "sample-tosec.bin")]
+	[InlineData("nointro-sample.dat", DatProviderKind.NoIntro, "Sample NoIntro Game", "sample-nointro.bin")]
+	public void Normalize_MapsXmlLikeFixtureFiles(string fileName, DatProviderKind provider, string expectedGameName, string expectedRomName) {
+		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", fileName);
+		var payload = File.ReadAllBytes(fixturePath);
+
+		var service = new CatalogNormalizationService();
+		var normalized = service.Normalize(payload, provider, fileName);
+
+		using var doc = JsonDocument.Parse(normalized);
+		var root = doc.RootElement;
+		var game = root.GetProperty("games")[0];
+		var rom = game.GetProperty("roms")[0];
+
+		Assert.Equal(provider.ToString(), root.GetProperty("provider").GetString());
+		Assert.Equal(expectedGameName, game.GetProperty("name").GetString());
+		Assert.Equal(expectedRomName, rom.GetProperty("name").GetString());
+	}
+
+	[Fact]
+	public void Normalize_MapsGoodToolsFixtureFileIntoGames() {
+		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "goodtools-sample.dat");
+		var payload = File.ReadAllBytes(fixturePath);
+
+		var service = new CatalogNormalizationService();
+		var normalized = service.Normalize(payload, DatProviderKind.GoodTools, "goodtools-sample.dat");
+
+		using var doc = JsonDocument.Parse(normalized);
+		var root = doc.RootElement;
+
+		Assert.Equal("GoodTools", root.GetProperty("provider").GetString());
+		Assert.Equal(3, root.GetProperty("games").GetArrayLength());
+	}
 }
