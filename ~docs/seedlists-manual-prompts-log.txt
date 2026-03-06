@@ -9,6 +9,39 @@
 
 Add to copilot instructions: `~docs\seedlists-manual-prompts-log.txt` is a user edited file (and only I can update it, you cannot update this file ever, even during git-restore), but always include it in the git commits. it is my manual log of what I am doing; continue;
 
+work through issues; continue;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

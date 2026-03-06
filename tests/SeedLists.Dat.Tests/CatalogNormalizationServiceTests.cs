@@ -113,4 +113,53 @@ public sealed class CatalogNormalizationServiceTests {
 		Assert.Equal("GoodTools", root.GetProperty("provider").GetString());
 		Assert.Equal(3, root.GetProperty("games").GetArrayLength());
 	}
+
+	[Fact]
+	public void Normalize_MalformedTosecFixture_FallsBackToWrapper() {
+		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "malformed-tosec-no-game-name.dat");
+		var payload = File.ReadAllBytes(fixturePath);
+
+		var service = new CatalogNormalizationService();
+		var normalized = service.Normalize(payload, DatProviderKind.Tosec, "malformed-tosec-no-game-name.dat");
+
+		using var doc = JsonDocument.Parse(normalized);
+		var root = doc.RootElement;
+
+		Assert.Equal("Tosec", root.GetProperty("provider").GetString());
+		Assert.Equal(0, root.GetProperty("games").GetArrayLength());
+		Assert.True(root.TryGetProperty("rawPreview", out _));
+	}
+
+	[Fact]
+	public void Normalize_MalformedGoodToolsFixture_FallsBackToWrapper() {
+		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "malformed-goodtools-no-rom-lines.dat");
+		var payload = File.ReadAllBytes(fixturePath);
+
+		var service = new CatalogNormalizationService();
+		var normalized = service.Normalize(payload, DatProviderKind.GoodTools, "malformed-goodtools-no-rom-lines.dat");
+
+		using var doc = JsonDocument.Parse(normalized);
+		var root = doc.RootElement;
+
+		Assert.Equal("GoodTools", root.GetProperty("provider").GetString());
+		Assert.Equal(0, root.GetProperty("games").GetArrayLength());
+		Assert.True(root.TryGetProperty("rawPreview", out _));
+	}
+
+	[Fact]
+	public void Normalize_MalformedNoIntroFixture_ProducesValidationDiagnostics() {
+		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "malformed-nointro-bad-hash.dat");
+		var payload = File.ReadAllBytes(fixturePath);
+
+		var normalization = new CatalogNormalizationService();
+		var normalized = normalization.Normalize(payload, DatProviderKind.NoIntro, "malformed-nointro-bad-hash.dat");
+
+		var validation = new CatalogValidationService();
+		var result = validation.Validate(normalized);
+
+		Assert.False(result.IsValid);
+		Assert.Contains(result.Errors, error => error.Contains("crc32", StringComparison.Ordinal));
+		Assert.Contains(result.Errors, error => error.Contains("md5", StringComparison.Ordinal));
+		Assert.Contains(result.Errors, error => error.Contains("sha1", StringComparison.Ordinal));
+	}
 }

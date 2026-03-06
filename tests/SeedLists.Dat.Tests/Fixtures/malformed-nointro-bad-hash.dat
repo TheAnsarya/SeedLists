@@ -1,0 +1,8 @@
+<datafile>
+	<game name="Broken Hash Game">
+		<description>Intentionally malformed hash values</description>
+		<manufacturer>NoIntro Broken Publisher</manufacturer>
+		<year>2001</year>
+		<rom name="brokenhash.bin" size="512" crc="zzzzzzzz" md5="1234" sha1="notavalidsha1" status="good" />
+	</game>
+</datafile>

@@ -1,0 +1,6 @@
+<datafile>
+	<game>
+		<description>Missing game name should trigger fallback</description>
+		<rom name="broken.bin" size="123" crc="abcdef12" />
+	</game>
+</datafile>
