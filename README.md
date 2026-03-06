@@ -9,7 +9,7 @@ This repository is JSON-first: internal parsing and normalization use JSON catal
 - `src/SeedLists.Dat`: reusable DAT library (providers, parsing, sync service)
 - `src/SeedLists.Worker`: background worker that executes periodic provider syncs
 - `tests/SeedLists.Dat.Tests`: unit tests for parsing and policy logic
-- `benchmarks/SeedLists.Benchmarks`: parser performance benchmark project
+- `benchmarks/SeedLists.Benchmarks`: parser and normalization performance benchmark project
 - `scripts/`: provider-specific helper scripts
 
 ## Providers
