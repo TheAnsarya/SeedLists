@@ -22,6 +22,9 @@ Issue: `#10`
 - `Worker:RetryDelaySeconds`: delay between retry attempts.
 - `Worker:StopCycleOnProviderFailure`: stop remaining providers in the cycle when one provider fails.
 - `Worker:EmitCycleSummary`: writes cycle-level telemetry summary logs.
+- `SeedListsDat:MaxDatsPerRun`: optional cap for per-provider source processing.
+- `SeedListsDat:IncludeNamePatterns`: optional wildcard include list for source names.
+- `SeedListsDat:ExcludeNamePatterns`: optional wildcard exclude list for source names.
 
 ## Internet Download Safety
 
@@ -52,3 +55,4 @@ Issue: `#10`
   - latest: `latest-sync-manifest.json`
   - historical: `{runId}-{provider}-sync-manifest.json`
 - Schema details and usage: `docs/SYNC_MANIFESTS.md`
+- Bounded run controls: `docs/BOUNDED_SYNC_CONTROLS.md`

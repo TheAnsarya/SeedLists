@@ -9,6 +9,9 @@ public sealed class SeedListsDatOptions {
 	public string GoodToolsLocalDirectory { get; set; } = @"C:\~reference-roms\roms";
 	public string NoIntroLocalDirectory { get; set; } = @"C:\~reference-roms\dats\nointro";
 	public string StateDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SeedLists", "state");
+	public int MaxDatsPerRun { get; set; }
+	public string[] IncludeNamePatterns { get; set; } = [];
+	public string[] ExcludeNamePatterns { get; set; } = [];
 	public bool EnableInternetDownloads { get; set; }
 	public bool AllowNoIntroDownloadDuringTesting { get; set; }
 	public string TosecDatFilesUrl { get; set; } = "https://www.tosecdev.org/downloads/category/22-datfiles";

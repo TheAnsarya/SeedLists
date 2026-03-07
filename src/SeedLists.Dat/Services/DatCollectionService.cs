@@ -4,6 +4,7 @@ using SeedLists.Dat.Options;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace SeedLists.Dat.Services;
 
@@ -43,7 +44,7 @@ public sealed class DatCollectionService(
 		Directory.CreateDirectory(providerOutputDir);
 
 		var started = DateTimeOffset.UtcNow;
-		var discovered = await providerInstance.ListAvailableAsync(cancellationToken);
+		var discovered = ApplyRunControls(await providerInstance.ListAvailableAsync(cancellationToken));
 		var sourceStatuses = discovered.Select(metadata => new DatSyncManifestSource {
 			Identifier = metadata.Identifier,
 			Name = metadata.Name,
@@ -173,6 +174,46 @@ public sealed class DatCollectionService(
 		var invalid = Path.GetInvalidFileNameChars();
 		var chars = name.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
 		return new string(chars);
+	}
+
+	private IReadOnlyList<DatMetadata> ApplyRunControls(IReadOnlyList<DatMetadata> discovered) {
+		IEnumerable<DatMetadata> query = discovered;
+
+		if (_options.IncludeNamePatterns.Length > 0) {
+			query = query.Where(metadata => MatchesAnyPattern(metadata.Name, _options.IncludeNamePatterns));
+		}
+
+		if (_options.ExcludeNamePatterns.Length > 0) {
+			query = query.Where(metadata => !MatchesAnyPattern(metadata.Name, _options.ExcludeNamePatterns));
+		}
+
+		if (_options.MaxDatsPerRun > 0) {
+			query = query.Take(_options.MaxDatsPerRun);
+		}
+
+		return query.ToList();
+	}
+
+	private static bool MatchesAnyPattern(string sourceName, IReadOnlyList<string> patterns) {
+		foreach (var pattern in patterns) {
+			if (string.IsNullOrWhiteSpace(pattern)) {
+				continue;
+			}
+
+			if (WildcardMatch(sourceName, pattern)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static bool WildcardMatch(string input, string pattern) {
+		var regexPattern = "^" + Regex.Escape(pattern.Trim())
+			.Replace("\\*", ".*")
+			.Replace("\\?", ".") + "$";
+
+		return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 	}
 
 	private static async Task<string> WriteManifestAsync(
