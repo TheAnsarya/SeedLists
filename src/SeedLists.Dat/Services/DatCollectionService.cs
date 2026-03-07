@@ -2,6 +2,8 @@ using SeedLists.Dat.Abstractions;
 using SeedLists.Dat.Models;
 using SeedLists.Dat.Options;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SeedLists.Dat.Services;
 
@@ -14,6 +16,12 @@ public sealed class DatCollectionService(
 	ICatalogNormalizationService normalizationService,
 	ICatalogValidationService validationService,
 	IOptions<SeedListsDatOptions> options) : IDatCollectionService {
+	private static readonly JsonSerializerOptions JsonOptions = new() {
+		WriteIndented = true,
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		Converters = { new JsonStringEnumConverter() },
+	};
+
 	private readonly IReadOnlyList<IDatProvider> _providers = providers.ToList();
 	private readonly IDatParserFactory _parserFactory = parserFactory;
 	private readonly ICatalogNormalizationService _normalizationService = normalizationService;
@@ -36,6 +44,18 @@ public sealed class DatCollectionService(
 
 		var started = DateTimeOffset.UtcNow;
 		var discovered = await providerInstance.ListAvailableAsync(cancellationToken);
+		var sourceStatuses = discovered.Select(metadata => new DatSyncManifestSource {
+			Identifier = metadata.Identifier,
+			Name = metadata.Name,
+			Description = metadata.Description,
+			Version = metadata.Version,
+			System = metadata.System,
+			DownloadUrl = metadata.DownloadUrl,
+			FileSize = metadata.FileSize,
+			LastUpdated = metadata.LastUpdated,
+			Status = "pending",
+		}).ToList();
+
 		var errors = new List<string>();
 		var processed = 0;
 		var failed = 0;
@@ -97,6 +117,7 @@ public sealed class DatCollectionService(
 				await File.WriteAllTextAsync(summaryPath, summaryJson, cancellationToken);
 
 				processed++;
+				sourceStatuses[i] = sourceStatuses[i] with { Status = "processed", Error = null };
 
 				progress?.Report(new DatSyncProgress {
 					Provider = provider,
@@ -108,8 +129,21 @@ public sealed class DatCollectionService(
 			} catch (Exception ex) {
 				failed++;
 				errors.Add($"{metadata.Name}: {ex.Message}");
+				sourceStatuses[i] = sourceStatuses[i] with { Status = "failed", Error = ex.Message };
 			}
 		}
+
+		var completed = DateTimeOffset.UtcNow;
+		var manifestPath = await WriteManifestAsync(
+			providerOutputDir,
+			provider,
+			started,
+			completed,
+			processed,
+			failed,
+			errors,
+			sourceStatuses,
+			cancellationToken);
 
 		progress?.Report(new DatSyncProgress {
 			Provider = provider,
@@ -121,11 +155,12 @@ public sealed class DatCollectionService(
 		return new DatSyncReport {
 			Provider = provider,
 			StartedAtUtc = started,
-			CompletedAtUtc = DateTimeOffset.UtcNow,
+			CompletedAtUtc = completed,
 			DatsDiscovered = discovered.Count,
 			DatsProcessed = processed,
 			DatsFailed = failed,
 			Errors = errors,
+			ManifestPath = manifestPath,
 		};
 	}
 
@@ -138,5 +173,42 @@ public sealed class DatCollectionService(
 		var invalid = Path.GetInvalidFileNameChars();
 		var chars = name.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
 		return new string(chars);
+	}
+
+	private static async Task<string> WriteManifestAsync(
+		string providerOutputDirectory,
+		DatProviderKind provider,
+		DateTimeOffset started,
+		DateTimeOffset completed,
+		int processed,
+		int failed,
+		IReadOnlyList<string> errors,
+		IReadOnlyList<DatSyncManifestSource> sources,
+		CancellationToken cancellationToken) {
+		var manifestDirectory = Path.Combine(providerOutputDirectory, "run-manifests");
+		Directory.CreateDirectory(manifestDirectory);
+
+		var runId = started.ToString("yyyyMMdd-HHmmss-fff");
+		var manifest = new DatSyncManifest {
+			RunId = runId,
+			Provider = provider,
+			StartedAtUtc = started,
+			CompletedAtUtc = completed,
+			ElapsedMilliseconds = Math.Max(0, (long)(completed - started).TotalMilliseconds),
+			DatsDiscovered = sources.Count,
+			DatsProcessed = processed,
+			DatsFailed = failed,
+			Errors = [.. errors],
+			Sources = [.. sources],
+		};
+
+		var manifestPath = Path.Combine(manifestDirectory, $"{runId}-{provider.ToString().ToLowerInvariant()}-sync-manifest.json");
+		var latestPath = Path.Combine(manifestDirectory, "latest-sync-manifest.json");
+
+		var json = JsonSerializer.Serialize(manifest, JsonOptions);
+		await File.WriteAllTextAsync(manifestPath, json, cancellationToken);
+		await File.WriteAllTextAsync(latestPath, json, cancellationToken);
+
+		return manifestPath;
 	}
 }

@@ -43,3 +43,12 @@ Issue: `#10`
   - wait 24h, or use testing override only for test environments
 - Parser failures:
   - ensure ingested files are normalized JSON catalog payloads
+
+## Run Artifacts
+
+- Provider run manifests are written under:
+  - `{SeedListsDat:OutputDirectory}/{provider}/run-manifests/`
+- Manifest references:
+  - latest: `latest-sync-manifest.json`
+  - historical: `{runId}-{provider}-sync-manifest.json`
+- Schema details and usage: `docs/SYNC_MANIFESTS.md`

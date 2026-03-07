@@ -41,3 +41,8 @@ No-Intro script behavior:
 
 - rejects remote runs if the last run is less than 24 hours ago
 - supports `-Testing` for test sessions
+
+## Run Artifacts
+
+- Provider sync manifests: `docs/SYNC_MANIFESTS.md`
+- Operator workflow and troubleshooting: `docs/INGESTION_RUNBOOK.md`

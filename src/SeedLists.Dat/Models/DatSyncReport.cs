@@ -11,4 +11,5 @@ public sealed record DatSyncReport {
 	public int DatsProcessed { get; init; }
 	public int DatsFailed { get; init; }
 	public IReadOnlyList<string> Errors { get; init; } = [];
+	public string? ManifestPath { get; init; }
 }
