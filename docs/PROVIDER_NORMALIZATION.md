@@ -1,6 +1,6 @@
 # Provider Normalization
 
-Issue: `#12`
+Issues: `#12`, `#24`
 
 SeedLists normalizes provider payloads into canonical JSON catalogs before schema validation and parsing.
 
@@ -15,7 +15,11 @@ SeedLists normalizes provider payloads into canonical JSON catalogs before schem
 
 - JSON payloads:
   - preserved and enriched with defaults (`name`, `provider`, `games`) when missing.
-- Non-JSON payloads:
+- TOSEC / No-Intro XML-like payloads:
+  - mapped to canonical `games[].roms[]` entries via semantic extraction.
+- GoodTools text payloads:
+  - mapped from line-based ROM filename heuristics.
+- Unmappable non-JSON payloads:
   - wrapped in a canonical JSON envelope with `games: []` and `rawPreview`.
 
 ## Notes
