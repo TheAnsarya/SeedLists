@@ -11,6 +11,9 @@ Add to copilot instructions: `~docs\seedlists-manual-prompts-log.txt` is a user 
 
 work through issues; continue;
 
+[SeedLists] continue issues and make new ones; documents! plans! code-plans! docs! implement; continue;
+
+Update the `readme.md` and linked documentation to be comprehensive and accurate and make sure every doc can be found through the link-tree starting in the main readme file; make a documentation update issue in github and plan the work before implementing it; make sure we have have good instructions for using SeedLists, not just CLI flags or whatever, but a full ecosystem approach and and also how to get the best results and what it's doing with the data you give it and the general pipeline; continue;
 
 
 

@@ -7,14 +7,14 @@ SeedLists uses a canonical JSON catalog schema for normalized DAT payloads.
 ## Canonical Schema File
 
 - Source: `src/SeedLists.Dat/Schemas/seedlists.catalog.schema.json`
-- Example payload: `docs/examples/sample-catalog.json`
+- Example payload: `examples/sample-catalog.json`
 - Contract tests: `tests/SeedLists.Dat.Tests/CatalogSchemaContractTests.cs`
 
 ## Conversion Strategy
 
-- Canonical mapping contract: `docs/CONVERSION_STRATEGY.md`
-- Provider mapping specifics: `docs/PROVIDER_MAPPINGS.md`
-- Malformed fallback strategy: `docs/MALFORMED_FIXTURE_STRATEGY.md`
+- Canonical mapping contract: `CONVERSION_STRATEGY.md`
+- Provider mapping specifics: `PROVIDER_MAPPINGS.md`
+- Malformed fallback strategy: `MALFORMED_FIXTURE_STRATEGY.md`
 
 ## Required Root Fields
 

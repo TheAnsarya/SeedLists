@@ -2,6 +2,8 @@
 
 Issue: `#24`
 
+- Full docs tree: `DOCUMENTATION_INDEX.md`
+
 ## Projects
 
 - `SeedLists.Dat`
@@ -37,8 +39,8 @@ Issue: `#24`
 
 ## Reference Docs
 
-- `docs/JSON_SCHEMA.md`
-- `docs/CONVERSION_STRATEGY.md`
-- `docs/PROVIDER_MAPPINGS.md`
-- `docs/INGESTION_RUNBOOK.md`
-- `docs/SYNC_MANIFESTS.md`
+- `JSON_SCHEMA.md`
+- `CONVERSION_STRATEGY.md`
+- `PROVIDER_MAPPINGS.md`
+- `INGESTION_RUNBOOK.md`
+- `SYNC_MANIFESTS.md`

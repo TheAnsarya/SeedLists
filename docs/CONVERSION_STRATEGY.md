@@ -51,4 +51,4 @@ For non-JSON payloads that do not match provider mappers:
 - keep `games` as an empty array
 - include `rawPreview` for diagnostics
 
-See `docs/MALFORMED_FIXTURE_STRATEGY.md` for malformed input handling details.
+See `MALFORMED_FIXTURE_STRATEGY.md` for malformed input handling details.
