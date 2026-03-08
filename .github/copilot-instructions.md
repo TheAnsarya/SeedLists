@@ -46,3 +46,19 @@ Primary goals:
 - `~docs\seedlists-manual-prompts-log.txt` is user-owned and user-edited.
 - AI agents must never modify this file, including during restore/revert operations.
 - Always include this file in commits when it has user changes.
+
+## Markdown Policy
+
+- Always fix markdown lint warnings when creating or editing markdown files.
+- Prioritize at least these rules in every markdown update:
+	- `MD022` (blank lines around headings)
+	- `MD031` (blank lines around fenced code blocks)
+	- `MD032` (blank lines around lists)
+	- `MD047` (single trailing newline at EOF)
+- Generate new markdown content with correct blank-line spacing by default so extra formatting passes are not required later.
+- Keep `MD010` disabled where tabs are intentionally required.
+
+## Documentation Link-Tree Policy
+
+- Every markdown document must be discoverable from `README.md` through a maintained link-tree.
+- When adding or renaming docs, update `README.md` and any intermediate index files so no markdown files become orphaned.

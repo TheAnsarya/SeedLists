@@ -7,13 +7,13 @@ Harden TOSEC and GoodTools provider ingestion paths with archive handling, disco
 ## Scope
 
 - TOSEC:
-	- add archive-aware local discovery
-	- add remote discovery dedupe + fallback behavior
-	- add retry handling for transient HTTP failures
-	- add zip payload extraction and explicit `.7z` guardrails
+ 	- add archive-aware local discovery
+ 	- add remote discovery dedupe + fallback behavior
+ 	- add retry handling for transient HTTP failures
+ 	- add zip payload extraction and explicit `.7z` guardrails
 - GoodTools:
-	- expand metadata classification and system derivation
-	- add zip payload extraction and explicit `.7z` guardrails
+ 	- expand metadata classification and system derivation
+ 	- add zip payload extraction and explicit `.7z` guardrails
 - tests for both providers
 
 ## Validation

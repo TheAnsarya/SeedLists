@@ -86,13 +86,13 @@ Malformed/unmappable payloads are wrapped into safe canonical envelopes with `ra
 ## Failure Handling Playbook
 
 - validation failures:
-	- inspect canonical payload and schema constraints (`JSON_SCHEMA.md`)
+ 	- inspect canonical payload and schema constraints (`JSON_SCHEMA.md`)
 - provider source issues:
-	- inspect source-level status and error fields in sync manifests
+ 	- inspect source-level status and error fields in sync manifests
 - No-Intro cooldown errors:
-	- wait for cooldown window or use test override in non-production contexts
+ 	- wait for cooldown window or use test override in non-production contexts
 - repeated ingestion failures:
-	- reduce run scope with bounded controls, then iterate on failing subset
+ 	- reduce run scope with bounded controls, then iterate on failing subset
 
 ## Outputs You Should Automate Against
 

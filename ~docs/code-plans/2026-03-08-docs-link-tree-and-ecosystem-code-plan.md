@@ -15,10 +15,10 @@ Restructure docs for discoverability and practical operations, with README as a 
 
 - Manual link-tree verification from `README.md` -> `docs/DOCUMENTATION_INDEX.md` -> every docs file.
 - Consistency check against implemented features:
-	- provider normalization + validation pipeline
-	- run manifests
-	- bounded sync controls
-	- provider handling policies
+ 	- provider normalization + validation pipeline
+ 	- run manifests
+ 	- bounded sync controls
+ 	- provider handling policies
 
 ## Deliverables
 

@@ -46,4 +46,3 @@ If a scenario crosses its budget:
 1. Capture the benchmark summary in `~docs/session-logs/`.
 2. Open a performance issue with benchmark output and suspected hot path.
 3. Land fixes with before/after benchmark evidence.
-
