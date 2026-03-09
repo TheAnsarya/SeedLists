@@ -19,7 +19,9 @@ Update the `readme.md` and linked documentation to be comprehensive and accurate
 
 [all repos] did you make benchmarks and tests for all of the work you just did? do it! make more benchmarks and tests and make more issues and implement them; continue;
 
+push all new commits now; continue immediately with a second batch of repo-specific performance issues and concrete code optimizations (not just docs tooling); continue;
 
+continue working an imnproving performance; nake sure to update and create new issues and update benchamrks, tests, and docs and instructions; continue;
 
 
 
