@@ -4,7 +4,6 @@ using SeedLists.Dat.Options;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace SeedLists.Dat.Services;
 
@@ -17,6 +16,8 @@ public sealed class DatCollectionService(
 	ICatalogNormalizationService normalizationService,
 	ICatalogValidationService validationService,
 	IOptions<SeedListsDatOptions> options) : IDatCollectionService {
+	private static readonly HashSet<char> InvalidFileNameChars = [.. Path.GetInvalidFileNameChars()];
+
 	private static readonly JsonSerializerOptions JsonOptions = new() {
 		WriteIndented = true,
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -171,9 +172,22 @@ public sealed class DatCollectionService(
 	}
 
 	private static string SafeFileName(string name) {
-		var invalid = Path.GetInvalidFileNameChars();
-		var chars = name.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
-		return new string(chars);
+		if (string.IsNullOrEmpty(name)) {
+			return name;
+		}
+
+		var chars = name.ToCharArray();
+		var changed = false;
+		for (var i = 0; i < chars.Length; i++) {
+			if (!InvalidFileNameChars.Contains(chars[i])) {
+				continue;
+			}
+
+			chars[i] = '_';
+			changed = true;
+		}
+
+		return changed ? new string(chars) : name;
 	}
 
 	private IReadOnlyList<DatMetadata> ApplyRunControls(IReadOnlyList<DatMetadata> discovered) {
@@ -209,11 +223,42 @@ public sealed class DatCollectionService(
 	}
 
 	private static bool WildcardMatch(string input, string pattern) {
-		var regexPattern = "^" + Regex.Escape(pattern.Trim())
-			.Replace("\\*", ".*")
-			.Replace("\\?", ".") + "$";
+		ReadOnlySpan<char> source = input.AsSpan();
+		ReadOnlySpan<char> wildcard = pattern.Trim().AsSpan();
 
-		return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+		var sourceIndex = 0;
+		var wildcardIndex = 0;
+		var starIndex = -1;
+		var sourceBacktrackIndex = 0;
+
+		while (sourceIndex < source.Length) {
+			if (wildcardIndex < wildcard.Length &&
+				(wildcard[wildcardIndex] == '?' ||
+				char.ToUpperInvariant(wildcard[wildcardIndex]) == char.ToUpperInvariant(source[sourceIndex]))) {
+				sourceIndex++;
+				wildcardIndex++;
+				continue;
+			}
+
+			if (wildcardIndex < wildcard.Length && wildcard[wildcardIndex] == '*') {
+				starIndex = wildcardIndex++;
+				sourceBacktrackIndex = sourceIndex;
+				continue;
+			}
+
+			if (starIndex == -1) {
+				return false;
+			}
+
+			wildcardIndex = starIndex + 1;
+			sourceIndex = ++sourceBacktrackIndex;
+		}
+
+		while (wildcardIndex < wildcard.Length && wildcard[wildcardIndex] == '*') {
+			wildcardIndex++;
+		}
+
+		return wildcardIndex == wildcard.Length;
 	}
 
 	private static async Task<string> WriteManifestAsync(

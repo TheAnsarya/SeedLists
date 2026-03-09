@@ -66,6 +66,31 @@ public sealed class DatCollectionServiceRunControlsTests {
 		}
 	}
 
+	[Fact]
+	public async Task SyncProviderAsync_WildcardsAreCaseInsensitiveAndSupportQuestionMark() {
+		var outputDirectory = CreateTempDirectory();
+		try {
+			var provider = new TestProvider();
+			var service = new DatCollectionService(
+				[provider],
+				new DatParserFactory([new StreamingJsonDatParser()]),
+				new CatalogNormalizationService(),
+				new CatalogValidationService(),
+				Microsoft.Extensions.Options.Options.Create(new SeedListsDatOptions {
+					OutputDirectory = outputDirectory,
+					IncludeNamePatterns = ["nes g?mma", "*delta"],
+				}));
+
+			var report = await service.SyncProviderAsync(DatProviderKind.Tosec, forceRefresh: false);
+
+			Assert.Equal(2, report.DatsDiscovered);
+			Assert.Equal(2, report.DatsProcessed);
+			Assert.Equal(["id-3", "id-4"], provider.DownloadedIdentifiers);
+		} finally {
+			DeleteTempDirectory(outputDirectory);
+		}
+	}
+
 	private static string CreateTempDirectory() {
 		var path = Path.Combine(Path.GetTempPath(), "SeedLists.Tests", Guid.NewGuid().ToString("N"));
 		Directory.CreateDirectory(path);
