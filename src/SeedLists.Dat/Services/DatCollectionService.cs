@@ -24,6 +24,10 @@ public sealed class DatCollectionService(
 		Converters = { new JsonStringEnumConverter() },
 	};
 
+	private static readonly JsonSerializerOptions SummaryJsonOptions = new() {
+		WriteIndented = true,
+	};
+
 	private readonly IReadOnlyList<IDatProvider> _providers = providers.ToList();
 	private readonly IDatParserFactory _parserFactory = parserFactory;
 	private readonly ICatalogNormalizationService _normalizationService = normalizationService;
@@ -86,8 +90,14 @@ public sealed class DatCollectionService(
 				await using var buffer = new MemoryStream();
 				await source.CopyToAsync(buffer, cancellationToken);
 				buffer.Position = 0;
-				var sourceBytes = buffer.ToArray();
-				var payloadBytes = _normalizationService.Normalize(sourceBytes, provider, metadata.Name);
+				if (!buffer.TryGetBuffer(out var sourceSegment)) {
+					throw new InvalidOperationException("Unable to read DAT payload buffer.");
+				}
+
+				var payloadBytes = _normalizationService.Normalize(
+					sourceSegment.AsSpan(0, (int)buffer.Length),
+					provider,
+					metadata.Name);
 
 				var validation = _validationService.Validate(payloadBytes);
 				if (!validation.IsValid) {
@@ -115,7 +125,7 @@ public sealed class DatCollectionService(
 				buffer.Position = 0;
 				var parsed = await parser.ParseAsync(buffer, Path.GetFileName(rawPath), cancellationToken: cancellationToken);
 				var summaryPath = Path.Combine(providerOutputDir, $"{rawName}.summary.json");
-				var summaryJson = System.Text.Json.JsonSerializer.Serialize(parsed, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+				var summaryJson = JsonSerializer.Serialize(parsed, SummaryJsonOptions);
 				await File.WriteAllTextAsync(summaryPath, summaryJson, cancellationToken);
 
 				processed++;

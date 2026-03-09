@@ -62,3 +62,10 @@ Primary goals:
 
 - Every markdown document must be discoverable from `README.md` through a maintained link-tree.
 - When adding or renaming docs, update `README.md` and any intermediate index files so no markdown files become orphaned.
+
+## Performance Validation Commands
+
+- Run normalization and sync regression tests:
+	- `dotnet test tests/SeedLists.Dat.Tests/SeedLists.Dat.Tests.csproj -c Release --filter "CatalogNormalizationServiceTests|DatCollectionServiceRunControlsTests"`
+- Run normalization benchmark coverage (including sliced-span JSON passthrough):
+	- `dotnet run --project benchmarks/SeedLists.Benchmarks/SeedLists.Benchmarks.csproj -c Release -- --filter "*CatalogNormalizationBenchmark*" --job short`

@@ -83,13 +83,29 @@ public class JsonDatParserBenchmark {
 public class CatalogNormalizationBenchmark {
 	private readonly CatalogNormalizationService _normalizer = new();
 	private readonly byte[] _jsonPayload = BuildJsonPayload();
+	private readonly byte[] _jsonPayloadPadded;
+	private readonly int _jsonPayloadOffset = 11;
 	private readonly byte[] _tosecPayload = BuildTosecPayload();
 	private readonly byte[] _noIntroPayload = BuildNoIntroPayload();
 	private readonly byte[] _goodToolsPayload = BuildGoodToolsPayload();
 
+	public CatalogNormalizationBenchmark() {
+		_jsonPayloadPadded = new byte[_jsonPayload.Length + 32];
+		Array.Fill(_jsonPayloadPadded, (byte)'_');
+		_jsonPayload.CopyTo(_jsonPayloadPadded.AsSpan(_jsonPayloadOffset));
+	}
+
 	[Benchmark(Baseline = true)]
 	public byte[] NormalizeJsonPassthrough() {
 		return _normalizer.Normalize(_jsonPayload, DatProviderKind.Tosec, "benchmark-json.dat");
+	}
+
+	[Benchmark]
+	public byte[] NormalizeJsonPassthroughSlicedSpan() {
+		return _normalizer.Normalize(
+			_jsonPayloadPadded.AsSpan(_jsonPayloadOffset, _jsonPayload.Length),
+			DatProviderKind.Tosec,
+			"benchmark-json-sliced.dat");
 	}
 
 	[Benchmark]

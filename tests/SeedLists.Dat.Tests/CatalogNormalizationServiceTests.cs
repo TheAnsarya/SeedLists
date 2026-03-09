@@ -34,6 +34,24 @@ public sealed class CatalogNormalizationServiceTests {
 	}
 
 	[Fact]
+	public void Normalize_ParsesJsonFromSlicedSpanWithoutPaddingLeak() {
+		var jsonPayload = Encoding.UTF8.GetBytes("{\"provider\":\"Tosec\",\"games\":[]}");
+		var paddedBuffer = new byte[jsonPayload.Length + 16];
+		Array.Fill(paddedBuffer, (byte)'x');
+		jsonPayload.CopyTo(paddedBuffer.AsSpan(8));
+
+		var service = new CatalogNormalizationService();
+		var normalized = service.Normalize(paddedBuffer.AsSpan(8, jsonPayload.Length), DatProviderKind.Tosec, "Sliced Provider");
+
+		using var doc = JsonDocument.Parse(normalized);
+		var root = doc.RootElement;
+
+		Assert.Equal("Sliced Provider", root.GetProperty("name").GetString());
+		Assert.Equal("Tosec", root.GetProperty("provider").GetString());
+		Assert.Equal(JsonValueKind.Array, root.GetProperty("games").ValueKind);
+	}
+
+	[Fact]
 	public void Normalize_MapsXmlLikeNoIntroCatalogIntoGamesAndRoms() {
 		var payload = Encoding.UTF8.GetBytes("""
 			<datafile>

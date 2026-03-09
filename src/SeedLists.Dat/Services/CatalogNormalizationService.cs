@@ -51,7 +51,7 @@ public sealed partial class CatalogNormalizationService : ICatalogNormalizationS
 		rootObject = null;
 
 		try {
-			var node = JsonNode.Parse(payload.ToArray());
+			var node = JsonNode.Parse(payload);
 			if (node is JsonObject obj) {
 				rootObject = obj;
 				return true;

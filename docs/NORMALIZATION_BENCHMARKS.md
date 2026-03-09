@@ -5,6 +5,7 @@ This document tracks BenchmarkDotNet coverage and allocation budgets for normali
 ## Covered Scenarios
 
 - JSON passthrough (`NormalizeJsonPassthrough`)
+- JSON passthrough from sliced span (`NormalizeJsonPassthroughSlicedSpan`)
 - TOSEC XML-like mapper (`NormalizeTosecXmlLike`)
 - No-Intro XML-like mapper (`NormalizeNoIntroXmlLike`)
 - GoodTools text mapper (`NormalizeGoodToolsText`)
@@ -29,6 +30,22 @@ Captured with:
 | GoodTools mapper | 15.363 us | 7.21 KB/op |
 | No-Intro mapper | 17.313 us | 13.5 KB/op |
 | TOSEC mapper | 21.176 us | 13.41 KB/op |
+
+## Snapshot Update (2026-03-09)
+
+Captured with:
+
+```powershell
+& "C:\Program Files\dotnet\dotnet.exe" run --project benchmarks/SeedLists.Benchmarks -c Release -- --filter *CatalogNormalizationBenchmark* --job short
+```
+
+| Scenario | Mean | Allocated |
+|---|---:|---:|
+| JSON passthrough sliced span | 1.803 us | 1.57 KB/op |
+| JSON passthrough | 1.953 us | 1.57 KB/op |
+| GoodTools mapper | 9.138 us | 7.10 KB/op |
+| TOSEC mapper | 14.725 us | 13.06 KB/op |
+| No-Intro mapper | 14.836 us | 13.13 KB/op |
 
 ## Allocation Budgets
 
