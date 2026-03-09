@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text;
 using Microsoft.Extensions.Options;
+using SeedLists.Dat.Abstractions;
 using SeedLists.Dat.Options;
 using SeedLists.Dat.Providers;
 
@@ -33,12 +34,12 @@ public sealed class TosecProviderTests {
 
 			var provider = new TosecProvider(options, new FakeHttpClientFactory(_ => new HttpResponseMessage(System.Net.HttpStatusCode.OK) {
 				Content = new StringContent(html, Encoding.UTF8, "text/html"),
-			}));
+			}), new InMemoryStateStore());
 
 			var results = await provider.ListAvailableAsync();
 
 			Assert.Equal(4, results.Count);
-			Assert.Equal(2, results.Count(item => item.Identifier.StartsWith("url::", StringComparison.OrdinalIgnoreCase)));
+			Assert.Equal(2, results.Count(item => item.Identifier.StartsWith("remote|", StringComparison.OrdinalIgnoreCase)));
 			Assert.Contains(results, item => item.Identifier.StartsWith("local::", StringComparison.OrdinalIgnoreCase) && item.Description!.Contains("archive (zip)", StringComparison.OrdinalIgnoreCase));
 		} finally {
 			DeleteTempDirectory(localRoot);
@@ -59,7 +60,7 @@ public sealed class TosecProviderTests {
 				TosecBaseUrl = "https://example.invalid",
 			});
 
-			var provider = new TosecProvider(options, new FakeHttpClientFactory(_ => throw new HttpRequestException("network down")));
+			var provider = new TosecProvider(options, new FakeHttpClientFactory(_ => throw new HttpRequestException("network down")), new InMemoryStateStore());
 			var results = await provider.ListAvailableAsync();
 
 			Assert.Single(results);
@@ -78,7 +79,7 @@ public sealed class TosecProviderTests {
 
 		var provider = new TosecProvider(options, new FakeHttpClientFactory(_ => new HttpResponseMessage(System.Net.HttpStatusCode.OK) {
 			Content = new ByteArrayContent(zipBytes),
-		}));
+		}), new InMemoryStateStore());
 
 		await using var stream = await provider.DownloadDatAsync("url::https://example.invalid/tosec.zip");
 		using var reader = new StreamReader(stream, Encoding.UTF8);
@@ -105,7 +106,7 @@ public sealed class TosecProviderTests {
 			return new HttpResponseMessage(System.Net.HttpStatusCode.OK) {
 				Content = new ByteArrayContent(Encoding.UTF8.GetBytes("{\"games\":[]}")),
 			};
-		}));
+		}), new InMemoryStateStore());
 
 		await using var stream = await provider.DownloadDatAsync("url::https://example.invalid/tosec.json");
 		using var reader = new StreamReader(stream, Encoding.UTF8);
@@ -141,6 +142,36 @@ public sealed class TosecProviderTests {
 			Directory.Delete(path, recursive: true);
 		} catch {
 			// Best effort temp cleanup.
+		}
+	}
+
+	private sealed class InMemoryStateStore : IDatSyncStateStore {
+		private readonly Dictionary<string, string> _values = [];
+
+		public Task<DateTimeOffset?> GetDateTimeAsync(string key, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			if (!_values.TryGetValue(key, out var raw) || !DateTimeOffset.TryParse(raw, out var parsed)) {
+				return Task.FromResult<DateTimeOffset?>(null);
+			}
+
+			return Task.FromResult<DateTimeOffset?>(parsed);
+		}
+
+		public Task SetDateTimeAsync(string key, DateTimeOffset value, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_values[key] = value.UtcDateTime.ToString("O");
+			return Task.CompletedTask;
+		}
+
+		public Task<string?> GetStringAsync(string key, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			return Task.FromResult(_values.TryGetValue(key, out var value) ? value : null);
+		}
+
+		public Task SetStringAsync(string key, string value, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_values[key] = value;
+			return Task.CompletedTask;
 		}
 	}
 

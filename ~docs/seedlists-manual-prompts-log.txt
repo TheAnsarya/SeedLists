@@ -25,6 +25,7 @@ continue working an imnproving performance; nake sure to update and create new i
 
 find MAME and MESS and other dats sources, do we have Redump? find and injest these dats! lets get the fruit machines and other stuff too!; make issues and plans and documentation updates; continue;
 
+No, I want auto-downloaders for MAME/MESS/Redump/fruit-machine/others like tosec and no-intro and goodtools, etc; find online sources and use them to download on a schedule or after checking for a new version; continue;
 
 
 

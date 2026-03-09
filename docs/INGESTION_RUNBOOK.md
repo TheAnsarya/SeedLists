@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`, `#30`, `#31`
+Issues: `#10`, `#25`, `#30`, `#31`, `#32`
 
 ## Documentation Context
 
@@ -34,6 +34,14 @@ Start in local-first mode and expand gradually:
     "MessLocalDirectory": "C:\\~reference-roms\\dats\\mess",
     "RedumpLocalDirectory": "C:\\~reference-roms\\dats\\redump",
     "EnableInternetDownloads": false,
+    "EnableRemoteVersionChecks": true,
+    "RemotePollIntervalHours": 24,
+    "MameRemoteIndexUrl": "https://www.progettosnaps.net/dats/MAME/",
+    "MessRemoteIndexUrl": "https://www.progettosnaps.net/dats/",
+    "RedumpRemoteIndexUrl": "https://www.redump.org/downloads/",
+    "GoodToolsRemoteDatUrls": [],
+    "RedumpRemoteDatUrls": [],
+    "FruitMachineRemoteDatUrls": [],
     "AllowNoIntroDownloadDuringTesting": false,
     "MaxDatsPerRun": 25,
     "IncludeNamePatterns": ["*"],
@@ -76,6 +84,8 @@ Use bounded controls until the pipeline behavior is stable for your dataset.
 - Keep `SeedListsDat:EnableInternetDownloads` disabled by default.
 - For No-Intro, remote download runs are cooldown-limited (24h).
 - Testing-only override is controlled by `SeedListsDat:AllowNoIntroDownloadDuringTesting`.
+- For remote auto-downloaders, keep `SeedListsDat:EnableRemoteVersionChecks = true` so unchanged remote packages are skipped.
+- Use `SeedListsDat:RemotePollIntervalHours` to control provider poll cadence.
 
 No-Intro policy details: `NOINTRO_COOLDOWN_POLICY.md`
 
@@ -113,6 +123,22 @@ Provider behavior references:
   - `*barcrest*`
   - `*jpm*`
 - Expand pattern scope only after `latest-sync-manifest.json` shows stable processed/failed ratios.
+
+## Remote Auto-Downloader Operation
+
+1. Enable remote mode with `SeedListsDat:EnableInternetDownloads = true`.
+2. Keep `SeedListsDat:EnableRemoteVersionChecks = true` for token-based change detection.
+3. Tune `SeedListsDat:RemotePollIntervalHours` to set minimum polling cadence per provider.
+4. Configure remote indexes/URL lists:
+
+  - `MameRemoteIndexUrl`
+  - `MessRemoteIndexUrl`
+  - `RedumpRemoteIndexUrl`
+  - `GoodToolsRemoteDatUrls`
+  - `RedumpRemoteDatUrls`
+  - `FruitMachineRemoteDatUrls`
+
+5. Run worker cycles and validate `run-manifests` to confirm only changed remote entries are being processed.
 
 ## Understanding Run Outputs
 

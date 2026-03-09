@@ -40,14 +40,29 @@ public sealed class NoIntroProviderTests {
 	}
 
 	private sealed class InMemoryStateStore : IDatSyncStateStore {
-		private readonly Dictionary<string, DateTimeOffset> _values = [];
+		private readonly Dictionary<string, string> _values = [];
 
 		public Task<DateTimeOffset?> GetDateTimeAsync(string key, CancellationToken cancellationToken = default) {
 			_ = cancellationToken;
-			return Task.FromResult(_values.TryGetValue(key, out var value) ? value : (DateTimeOffset?)null);
+			if (!_values.TryGetValue(key, out var raw) || !DateTimeOffset.TryParse(raw, out var parsed)) {
+				return Task.FromResult<DateTimeOffset?>(null);
+			}
+
+			return Task.FromResult<DateTimeOffset?>(parsed);
 		}
 
 		public Task SetDateTimeAsync(string key, DateTimeOffset value, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_values[key] = value.UtcDateTime.ToString("O");
+			return Task.CompletedTask;
+		}
+
+		public Task<string?> GetStringAsync(string key, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			return Task.FromResult(_values.TryGetValue(key, out var value) ? value : null);
+		}
+
+		public Task SetStringAsync(string key, string value, CancellationToken cancellationToken = default) {
 			_ = cancellationToken;
 			_values[key] = value;
 			return Task.CompletedTask;

@@ -10,7 +10,10 @@ namespace SeedLists.Dat.Providers;
 /// <summary>
 /// TOSEC provider backed by local DATs and optional internet indexing.
 /// </summary>
-public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpClientFactory httpClientFactory) : IDatProvider {
+public sealed class TosecProvider(
+	IOptions<SeedListsDatOptions> options,
+	IHttpClientFactory httpClientFactory,
+	IDatSyncStateStore stateStore) : IDatProvider {
 	private const int MaxHttpAttempts = 3;
 	private static readonly TimeSpan RetryDelay = TimeSpan.FromMilliseconds(300);
 	private static readonly string[] LocalExtensions = [".dat", ".zip", ".7z"];
@@ -18,6 +21,7 @@ public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpCl
 
 	private readonly SeedListsDatOptions _options = options.Value;
 	private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+	private readonly IDatSyncStateStore _stateStore = stateStore;
 
 	public DatProviderKind ProviderType => DatProviderKind.Tosec;
 
@@ -26,11 +30,22 @@ public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpCl
 		entries.AddRange(GetLocalDats());
 
 		if (_options.EnableInternetDownloads) {
+			if (_options.EnableRemoteVersionChecks) {
+				var shouldPoll = await RemoteDatSupport.ShouldPollAsync(_stateStore, "tosec", _options.RemotePollIntervalHours, cancellationToken);
+				if (!shouldPoll) {
+					return entries;
+				}
+			}
+
 			try {
 				var remote = await GetRemoteArchiveLinksAsync(cancellationToken);
 				entries.AddRange(remote);
 			} catch (Exception ex) when (ex is not OperationCanceledException) {
 				// Keep local discovery usable if TOSEC indexing is temporarily unavailable.
+			} finally {
+				if (_options.EnableRemoteVersionChecks) {
+					await RemoteDatSupport.MarkPolledAsync(_stateStore, "tosec", cancellationToken);
+				}
 			}
 		}
 
@@ -54,17 +69,26 @@ public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpCl
 			};
 		}
 
-		if (!identifier.StartsWith("url::", StringComparison.OrdinalIgnoreCase)) {
-			throw new NotSupportedException("TOSEC identifier must be local:: or url::.");
-		}
-
 		if (!_options.EnableInternetDownloads) {
 			throw new InvalidOperationException("Internet downloads are disabled. Enable SeedListsDat:EnableInternetDownloads.");
 		}
 
-		var url = identifier["url::".Length..];
+		string url;
+		string? remoteToken = null;
+		if (identifier.StartsWith("url::", StringComparison.OrdinalIgnoreCase)) {
+			url = identifier["url::".Length..];
+		} else if (RemoteDatSupport.TryParseRemoteIdentifier(identifier, out var parsedToken, out var remoteUrl)) {
+			remoteToken = parsedToken;
+			url = remoteUrl;
+		} else {
+			throw new NotSupportedException("TOSEC identifier must be local::, url::, or remote|<token>|<url>.");
+		}
+
 		var bytes = await DownloadWithRetryAsync(url, cancellationToken);
 		var remoteExtension = TryGetUriExtension(url);
+		if (!string.IsNullOrWhiteSpace(remoteToken)) {
+			await RemoteDatSupport.SetTokenAsync(_stateStore, "tosec", url, remoteToken, cancellationToken);
+		}
 
 		return remoteExtension switch {
 			".zip" => await ExtractDatFromZipAsync(new MemoryStream(bytes, writable: false), url, cancellationToken),
@@ -75,7 +99,8 @@ public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpCl
 
 	public bool SupportsIdentifier(string identifier) {
 		return identifier.StartsWith("local::", StringComparison.OrdinalIgnoreCase)
-			|| identifier.StartsWith("url::", StringComparison.OrdinalIgnoreCase);
+			|| identifier.StartsWith("url::", StringComparison.OrdinalIgnoreCase)
+			|| identifier.StartsWith("remote|", StringComparison.OrdinalIgnoreCase);
 	}
 
 	private IEnumerable<DatMetadata> GetLocalDats() {
@@ -124,15 +149,25 @@ public sealed class TosecProvider(IOptions<SeedListsDatOptions> options, IHttpCl
 
 			var extension = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
 
+			var remoteUrl = uri.ToString();
+			var fileToken = Path.GetFileName(uri.AbsolutePath);
+			if (_options.EnableRemoteVersionChecks) {
+				var changed = await RemoteDatSupport.HasChangedAsync(_stateStore, "tosec", remoteUrl, fileToken, cancellationToken);
+				if (!changed) {
+					continue;
+				}
+			}
+
 			links.Add(new DatMetadata {
-				Identifier = $"url::{uri}",
+				Identifier = RemoteDatSupport.BuildRemoteIdentifier(fileToken, remoteUrl),
 				Name = Path.GetFileNameWithoutExtension(uri.AbsolutePath),
 				Description = extension switch {
 					".7z" => "TOSEC remote DAT archive (7z)",
 					_ => "TOSEC remote DAT archive (zip)",
 				},
+				Version = fileToken,
 				System = "TOSEC",
-				DownloadUrl = uri.ToString(),
+				DownloadUrl = remoteUrl,
 			});
 		}
 

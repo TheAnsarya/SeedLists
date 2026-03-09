@@ -6,4 +6,6 @@ namespace SeedLists.Dat.Abstractions;
 public interface IDatSyncStateStore {
 	Task<DateTimeOffset?> GetDateTimeAsync(string key, CancellationToken cancellationToken = default);
 	Task SetDateTimeAsync(string key, DateTimeOffset value, CancellationToken cancellationToken = default);
+	Task<string?> GetStringAsync(string key, CancellationToken cancellationToken = default);
+	Task SetStringAsync(string key, string value, CancellationToken cancellationToken = default);
 }

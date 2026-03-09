@@ -48,6 +48,32 @@ public sealed class FileDatSyncStateStore : IDatSyncStateStore {
 		}
 	}
 
+	public async Task<string?> GetStringAsync(string key, CancellationToken cancellationToken = default) {
+		ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+		await _gate.WaitAsync(cancellationToken);
+		try {
+			var state = await ReadStateAsync(cancellationToken);
+			return state.TryGetValue(key, out var value) ? value : null;
+		} finally {
+			_gate.Release();
+		}
+	}
+
+	public async Task SetStringAsync(string key, string value, CancellationToken cancellationToken = default) {
+		ArgumentException.ThrowIfNullOrWhiteSpace(key);
+		ArgumentException.ThrowIfNullOrWhiteSpace(value);
+
+		await _gate.WaitAsync(cancellationToken);
+		try {
+			var state = await ReadStateAsync(cancellationToken);
+			state[key] = value;
+			await WriteStateAsync(state, cancellationToken);
+		} finally {
+			_gate.Release();
+		}
+	}
+
 	private async Task<Dictionary<string, string>> ReadStateAsync(CancellationToken cancellationToken) {
 		if (!File.Exists(_stateFilePath)) {
 			return [];

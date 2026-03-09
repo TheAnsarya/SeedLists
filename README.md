@@ -28,12 +28,12 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 
 ## Provider Model
 
-- TOSEC: local discovery plus optional remote index/archive workflows
-- GoodTools: local `.dat` and archive ingestion workflows
+- TOSEC: local discovery plus optional remote index/archive workflows with token-based change detection
+- GoodTools: local `.dat`/archive ingestion plus optional remote URL polling with token checks
 - No-Intro: local-first ingestion with guarded remote mode and a mandatory 24-hour cooldown policy
-- MAME: local `.dat`/`.zip` ingestion for arcade machine catalog workflows
-- MESS: local `.dat`/`.zip` ingestion for software-list catalog workflows
-- Redump: local `.dat`/`.zip` ingestion for disc-preservation catalog workflows
+- MAME: local `.dat`/`.zip` ingestion plus optional remote index polling/version checks
+- MESS: local `.dat`/`.zip` ingestion plus optional remote index polling/version checks
+- Redump: local `.dat`/`.zip` ingestion plus optional remote index/manual URL polling/version checks
 
 ## Quick Start
 
@@ -57,6 +57,20 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 5. Tune bounded sync controls (`MaxDatsPerRun`, include/exclude patterns) for safer large library onboarding.
 
 For MAME/MESS and fruit-machine-focused onboarding, prefer `IncludeNamePatterns` filters (for example `"*fruit*"`, `"*slot*"`, `"*aristocrat*"`) to stage ingestion in narrow slices.
+
+## Remote Polling Controls
+
+Use these options to auto-discover and auto-download only changed remote DAT sources:
+
+- `SeedListsDat:EnableInternetDownloads`: enables remote provider discovery/download behavior
+- `SeedListsDat:EnableRemoteVersionChecks`: enables remote token/signature change detection
+- `SeedListsDat:RemotePollIntervalHours`: minimum poll interval per provider
+- `SeedListsDat:MameRemoteIndexUrl`: MAME remote index page
+- `SeedListsDat:MessRemoteIndexUrl`: MESS remote index page
+- `SeedListsDat:RedumpRemoteIndexUrl`: Redump remote index page
+- `SeedListsDat:GoodToolsRemoteDatUrls`: direct GoodTools DAT/ZIP URLs
+- `SeedListsDat:RedumpRemoteDatUrls`: fallback direct Redump DAT/ZIP URLs
+- `SeedListsDat:FruitMachineRemoteDatUrls`: optional fruit-machine DAT/ZIP URLs staged via include patterns
 
 ## Getting Best Results
 

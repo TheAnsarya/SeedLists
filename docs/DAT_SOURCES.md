@@ -1,6 +1,6 @@
 # DAT Sources
 
-Issues: `#24`, `#30`, `#31`
+Issues: `#24`, `#30`, `#31`, `#32`
 
 SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 
@@ -17,6 +17,10 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 
 - Local source default: `C:\~reference-roms\roms`
 - Provider ingests `.dat`, `.zip`, and `.7z` entries as candidates.
+- Optional remote source URLs:
+  - `SeedListsDat:GoodToolsRemoteDatUrls`
+- Remote behavior:
+  - poll and list only changed remote entries when `EnableRemoteVersionChecks` is enabled
 - Archive handling:
   - `.zip`: extracted automatically
   - `.7z`: currently requires manual extraction
@@ -39,6 +43,11 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
     - `https://www.progettosnaps.net/dats/MAME/`
     - `https://www.progettosnaps.net/dats/`
 - Supported local file types: `.dat`, `.zip`, `.7z`
+- Optional remote index:
+  - `SeedListsDat:MameRemoteIndexUrl`
+- Remote behavior:
+  - index scraping for DAT package links
+  - token-based change detection and poll gating (`RemotePollIntervalHours`)
 - Archive handling:
   - `.zip`: extracted automatically
   - `.7z`: currently requires manual extraction
@@ -52,6 +61,11 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
   - progetto-SNAPS DAT resource packs with MESS/softlist coverage:
     - `https://www.progettosnaps.net/dats/`
 - Supported local file types: `.dat`, `.zip`, `.7z`
+- Optional remote index:
+  - `SeedListsDat:MessRemoteIndexUrl`
+- Remote behavior:
+  - index scraping for software-list DAT package links
+  - token-based change detection and poll gating (`RemotePollIntervalHours`)
 - Archive handling:
   - `.zip`: extracted automatically
   - `.7z`: currently requires manual extraction
@@ -59,12 +73,16 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 ## Redump
 
 - Local source default: `C:\~reference-roms\dats\redump`
-- Status: Yes, Redump ingestion is supported in SeedLists through local-first provider workflows.
-- Acquisition model: manual/local DAT placement is currently recommended.
+- Status: Redump ingestion is supported in both local-first and optional remote polling workflows.
+- Optional remote index:
+  - `SeedListsDat:RedumpRemoteIndexUrl`
+- Optional fallback URL list:
+  - `SeedListsDat:RedumpRemoteDatUrls`
+- Remote behavior:
+  - index scraping where available with fallback to configured direct URLs
+  - token-based change detection and poll gating (`RemotePollIntervalHours`)
 - Primary project page:
   - `https://www.redump.org/`
-- Note:
-  - Direct automated download integration is intentionally not required for baseline ingestion; place DAT packs locally and run provider sync.
 
 ## Fruit Machine Coverage
 
@@ -72,8 +90,17 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 - Recommended onboarding strategy:
   - stage by include patterns (for example `*fruit*`, `*slot*`, `*aristocrat*`, `*barcrest*`, `*jpm*`)
   - keep bounded run caps enabled until manifests show stable pass rates
+- Optional remote URL list for fruit-machine DAT payloads:
+  - `SeedListsDat:FruitMachineRemoteDatUrls`
+  - remote files are staged through MAME/MESS naming and include-pattern filtering
 - Operator reference catalog browser:
   - `https://mame.spludlow.co.uk/`
+
+## Shared Remote Polling Controls
+
+- `SeedListsDat:EnableInternetDownloads`: enables remote provider index/URL polling and download
+- `SeedListsDat:EnableRemoteVersionChecks`: enables token/signature checks before re-downloading
+- `SeedListsDat:RemotePollIntervalHours`: minimum interval between provider poll attempts
 
 ## Output Contract
 

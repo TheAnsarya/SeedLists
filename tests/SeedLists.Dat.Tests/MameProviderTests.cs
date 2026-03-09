@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text;
+using SeedLists.Dat.Abstractions;
 using SeedLists.Dat.Options;
 using SeedLists.Dat.Providers;
 
@@ -50,7 +51,60 @@ public sealed class MameProviderTests {
 			MameLocalDirectory = root,
 		});
 
-		return new MameProvider(options);
+		return new MameProvider(
+			options,
+			new InMemoryStateStore(),
+			new FakeHttpClientFactory(_ => new HttpResponseMessage(System.Net.HttpStatusCode.OK) {
+				Content = new StringContent("<html/>", Encoding.UTF8, "text/html"),
+			}));
+	}
+
+	private sealed class InMemoryStateStore : IDatSyncStateStore {
+		private readonly Dictionary<string, string> _values = [];
+
+		public Task<DateTimeOffset?> GetDateTimeAsync(string key, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			if (!_values.TryGetValue(key, out var raw) || !DateTimeOffset.TryParse(raw, out var parsed)) {
+				return Task.FromResult<DateTimeOffset?>(null);
+			}
+
+			return Task.FromResult<DateTimeOffset?>(parsed);
+		}
+
+		public Task SetDateTimeAsync(string key, DateTimeOffset value, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_values[key] = value.UtcDateTime.ToString("O");
+			return Task.CompletedTask;
+		}
+
+		public Task<string?> GetStringAsync(string key, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			return Task.FromResult(_values.TryGetValue(key, out var value) ? value : null);
+		}
+
+		public Task SetStringAsync(string key, string value, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_values[key] = value;
+			return Task.CompletedTask;
+		}
+	}
+
+	private sealed class FakeHttpClientFactory(Func<HttpRequestMessage, HttpResponseMessage> responder) : IHttpClientFactory {
+		private readonly Func<HttpRequestMessage, HttpResponseMessage> _responder = responder;
+
+		public HttpClient CreateClient(string name) {
+			_ = name;
+			return new HttpClient(new FakeHttpMessageHandler(_responder), disposeHandler: true);
+		}
+	}
+
+	private sealed class FakeHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler {
+		private readonly Func<HttpRequestMessage, HttpResponseMessage> _responder = responder;
+
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+			_ = cancellationToken;
+			return Task.FromResult(_responder(request));
+		}
 	}
 
 	private static byte[] BuildZipArchive(string entryName, string entryContent) {
