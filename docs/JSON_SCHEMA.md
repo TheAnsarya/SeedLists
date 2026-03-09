@@ -1,6 +1,6 @@
 # JSON Schema
 
-Issue: `#2`
+Issues: `#2`, `#30`
 
 SeedLists uses a canonical JSON catalog schema for normalized DAT payloads.
 
@@ -19,7 +19,7 @@ SeedLists uses a canonical JSON catalog schema for normalized DAT payloads.
 ## Required Root Fields
 
 - `name`: non-empty string
-- `provider`: one of `Unknown`, `NoIntro`, `Tosec`, `GoodTools`
+- `provider`: one of `Unknown`, `NoIntro`, `Tosec`, `GoodTools`, `Mame`, `Mess`, `Redump`
 - `games`: array of game entries
 
 ## Game Requirements

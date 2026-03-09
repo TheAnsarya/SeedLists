@@ -1,6 +1,6 @@
 # DAT Sources
 
-Issue: `#24`
+Issues: `#24`, `#30`, `#31`
 
 SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 
@@ -28,6 +28,52 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 - Policy:
   - enforce minimum 24 hours between remote download runs
   - allow testing override in controlled contexts
+
+## MAME
+
+- Local source default: `C:\~reference-roms\dats\mame`
+- Recommended source references:
+  - MAME command-line docs (`-listxml`, `-listsoftware`):
+    - `https://docs.mamedev.org/commandline/commandline-all.html`
+  - progetto-SNAPS MAME DAT history/packages:
+    - `https://www.progettosnaps.net/dats/MAME/`
+    - `https://www.progettosnaps.net/dats/`
+- Supported local file types: `.dat`, `.zip`, `.7z`
+- Archive handling:
+  - `.zip`: extracted automatically
+  - `.7z`: currently requires manual extraction
+
+## MESS (Software Lists)
+
+- Local source default: `C:\~reference-roms\dats\mess`
+- Recommended source references:
+  - MAME command-line software list exports (`-listsoftware`, `-getsoftlist`):
+    - `https://docs.mamedev.org/commandline/commandline-all.html`
+  - progetto-SNAPS DAT resource packs with MESS/softlist coverage:
+    - `https://www.progettosnaps.net/dats/`
+- Supported local file types: `.dat`, `.zip`, `.7z`
+- Archive handling:
+  - `.zip`: extracted automatically
+  - `.7z`: currently requires manual extraction
+
+## Redump
+
+- Local source default: `C:\~reference-roms\dats\redump`
+- Status: Yes, Redump ingestion is supported in SeedLists through local-first provider workflows.
+- Acquisition model: manual/local DAT placement is currently recommended.
+- Primary project page:
+  - `https://www.redump.org/`
+- Note:
+  - Direct automated download integration is intentionally not required for baseline ingestion; place DAT packs locally and run provider sync.
+
+## Fruit Machine Coverage
+
+- Fruit-machine catalogs are commonly present in MAME ecosystem sets (for example Aristocrat, Barcrest, JPM, and related machine families).
+- Recommended onboarding strategy:
+  - stage by include patterns (for example `*fruit*`, `*slot*`, `*aristocrat*`, `*barcrest*`, `*jpm*`)
+  - keep bounded run caps enabled until manifests show stable pass rates
+- Operator reference catalog browser:
+  - `https://mame.spludlow.co.uk/`
 
 ## Output Contract
 

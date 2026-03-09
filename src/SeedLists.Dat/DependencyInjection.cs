@@ -24,6 +24,9 @@ public static class DependencyInjection {
 		services.AddSingleton<IDatProvider, TosecProvider>();
 		services.AddSingleton<IDatProvider, GoodToolsProvider>();
 		services.AddSingleton<IDatProvider, NoIntroProvider>();
+		services.AddSingleton<IDatProvider, MameProvider>();
+		services.AddSingleton<IDatProvider, MessProvider>();
+		services.AddSingleton<IDatProvider, RedumpProvider>();
 		services.AddSingleton<IDatCollectionService, DatCollectionService>();
 
 		return services;

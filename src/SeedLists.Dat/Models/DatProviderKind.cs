@@ -8,4 +8,7 @@ public enum DatProviderKind {
 	NoIntro = 1,
 	Tosec = 2,
 	GoodTools = 3,
+	Mame = 4,
+	Mess = 5,
+	Redump = 6,
 }

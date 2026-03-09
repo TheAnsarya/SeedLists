@@ -8,6 +8,9 @@ public sealed class SeedListsDatOptions {
 	public string TosecLocalDirectory { get; set; } = @"D:\Roms\TOSEC";
 	public string GoodToolsLocalDirectory { get; set; } = @"C:\~reference-roms\roms";
 	public string NoIntroLocalDirectory { get; set; } = @"C:\~reference-roms\dats\nointro";
+	public string MameLocalDirectory { get; set; } = @"C:\~reference-roms\dats\mame";
+	public string MessLocalDirectory { get; set; } = @"C:\~reference-roms\dats\mess";
+	public string RedumpLocalDirectory { get; set; } = @"C:\~reference-roms\dats\redump";
 	public string StateDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SeedLists", "state");
 	public int MaxDatsPerRun { get; set; }
 	public string[] IncludeNamePatterns { get; set; } = [];

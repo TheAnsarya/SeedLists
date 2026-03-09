@@ -10,5 +10,5 @@ public sealed class WorkerOptions {
 	public int RetryDelaySeconds { get; set; } = 20;
 	public bool StopCycleOnProviderFailure { get; set; }
 	public bool EmitCycleSummary { get; set; } = true;
-	public string[] Providers { get; set; } = ["Tosec", "GoodTools", "NoIntro"];
+	public string[] Providers { get; set; } = ["Tosec", "GoodTools", "NoIntro", "Mame", "Mess", "Redump"];
 }

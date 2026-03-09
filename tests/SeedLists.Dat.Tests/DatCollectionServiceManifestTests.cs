@@ -10,6 +10,36 @@ namespace SeedLists.Dat.Tests;
 
 public sealed class DatCollectionServiceManifestTests {
 	[Fact]
+	public async Task SyncProviderAsync_ParsesNormalizedPayloadForXmlLikeSources() {
+		var outputDirectory = CreateTempDirectory();
+		try {
+			var provider = new XmlLikeProvider();
+			var service = new DatCollectionService(
+				[provider],
+				new DatParserFactory([new StreamingJsonDatParser()]),
+				new CatalogNormalizationService(),
+				new CatalogValidationService(),
+				Microsoft.Extensions.Options.Options.Create(new SeedListsDatOptions {
+					OutputDirectory = outputDirectory,
+				}));
+
+			var report = await service.SyncProviderAsync(DatProviderKind.Mame, forceRefresh: false);
+
+			Assert.Equal(1, report.DatsDiscovered);
+			Assert.Equal(1, report.DatsProcessed);
+			Assert.Equal(0, report.DatsFailed);
+
+			var summaryPath = Path.Combine(outputDirectory, "mame", "sample-xml.summary.json");
+			Assert.True(File.Exists(summaryPath));
+
+			using var document = JsonDocument.Parse(await File.ReadAllBytesAsync(summaryPath));
+			Assert.Equal(1, document.RootElement.GetProperty("Games").GetArrayLength());
+		} finally {
+			DeleteTempDirectory(outputDirectory);
+		}
+	}
+
+	[Fact]
 	public async Task SyncProviderAsync_WritesManifestWithSourceStatuses() {
 		var outputDirectory = CreateTempDirectory();
 		try {
@@ -114,6 +144,42 @@ public sealed class DatCollectionServiceManifestTests {
 
 		public bool SupportsIdentifier(string identifier) {
 			return identifier is "ok" or "fail";
+		}
+	}
+
+	private sealed class XmlLikeProvider : IDatProvider {
+		public DatProviderKind ProviderType => DatProviderKind.Mame;
+
+		public Task<IReadOnlyList<DatMetadata>> ListAvailableAsync(CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			return Task.FromResult<IReadOnlyList<DatMetadata>>([
+				new DatMetadata {
+					Identifier = "xml-ok",
+					Name = "sample-xml",
+					Description = "xml source",
+					System = "MAME",
+				}
+			]);
+		}
+
+		public Task<Stream> DownloadDatAsync(string identifier, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_ = identifier;
+
+			var xml = """
+				<datafile>
+					<game name="sample-game">
+						<description>Sample Game</description>
+						<rom name="sample.bin" size="16" crc="ABCDEF12"/>
+					</game>
+				</datafile>
+				""";
+
+			return Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes(xml), writable: false));
+		}
+
+		public bool SupportsIdentifier(string identifier) {
+			return identifier == "xml-ok";
 		}
 	}
 }

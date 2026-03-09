@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`
+Issues: `#10`, `#25`, `#30`, `#31`
 
 ## Documentation Context
 
@@ -14,6 +14,9 @@ Issues: `#10`, `#25`
   - TOSEC: `D:\Roms\TOSEC`
   - GoodTools: `C:\~reference-roms\roms`
   - No-Intro local DATs: `C:\~reference-roms\dats\nointro`
+  - MAME local DATs: `C:\~reference-roms\dats\mame`
+  - MESS local DATs: `C:\~reference-roms\dats\mess`
+  - Redump local DATs: `C:\~reference-roms\dats\redump`
 
 ## Recommended Initial Configuration
 
@@ -24,11 +27,20 @@ Start in local-first mode and expand gradually:
   "SeedListsDat": {
     "OutputDirectory": "C:\\SeedLists\\output",
     "StateDirectory": "C:\\SeedLists\\state",
+    "TosecLocalDirectory": "D:\\Roms\\TOSEC",
+    "GoodToolsLocalDirectory": "C:\\~reference-roms\\roms",
+    "NoIntroLocalDirectory": "C:\\~reference-roms\\dats\\nointro",
+    "MameLocalDirectory": "C:\\~reference-roms\\dats\\mame",
+    "MessLocalDirectory": "C:\\~reference-roms\\dats\\mess",
+    "RedumpLocalDirectory": "C:\\~reference-roms\\dats\\redump",
     "EnableInternetDownloads": false,
     "AllowNoIntroDownloadDuringTesting": false,
     "MaxDatsPerRun": 25,
     "IncludeNamePatterns": ["*"],
     "ExcludeNamePatterns": []
+  },
+  "Worker": {
+    "Providers": ["Tosec", "GoodTools", "NoIntro", "Mame", "Mess", "Redump"]
   }
 }
 ```
@@ -87,6 +99,20 @@ Provider behavior references:
   - wait 24h, or use testing override only for test environments
 - Parser failures:
   - ensure ingested files are normalized JSON catalog payloads
+
+## MAME, MESS, and Fruit-Machine Onboarding
+
+- Generate local XML DAT exports directly from MAME when needed:
+  - `mame -listxml > mame.xml`
+  - `mame <system> -listsoftware > <system>-softwarelists.xml`
+- Store exported or downloaded DAT files under configured local source roots.
+- For fruit-machine-heavy ingestion, start with narrow include patterns:
+  - `*fruit*`
+  - `*slot*`
+  - `*aristocrat*`
+  - `*barcrest*`
+  - `*jpm*`
+- Expand pattern scope only after `latest-sync-manifest.json` shows stable processed/failed ratios.
 
 ## Understanding Run Outputs
 

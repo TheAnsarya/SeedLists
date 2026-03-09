@@ -26,7 +26,7 @@
 		},
 		"provider": {
 			"type": "string",
-			"enum": ["Unknown", "NoIntro", "Tosec", "GoodTools"]
+			"enum": ["Unknown", "NoIntro", "Tosec", "GoodTools", "Mame", "Mess", "Redump"]
 		},
 		"games": {
 			"type": "array",

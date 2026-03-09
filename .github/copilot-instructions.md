@@ -7,7 +7,7 @@
 Primary goals:
 - Reuse and adapt proven DAT parsing/downloading patterns from `subrom`
 - Keep SeedLists as a separate library and worker pipeline
-- Support TOSEC, GoodTools, and No-Intro ingestion with safe policies
+- Support TOSEC, GoodTools, No-Intro, MAME, MESS, and Redump ingestion with safe policies
 - Track all substantial work through GitHub issues
 
 ## Source Reuse Policy

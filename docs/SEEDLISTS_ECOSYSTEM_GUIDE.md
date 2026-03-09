@@ -1,6 +1,6 @@
 # SeedLists Ecosystem Guide
 
-Issue: `#25`
+Issues: `#25`, `#30`, `#31`
 
 This guide explains how to use SeedLists as a full ingestion ecosystem, not just as a command invocation.
 
@@ -30,7 +30,7 @@ Treat each stage as observable and testable.
 
 Suggested separation:
 
-- provider source roots (TOSEC, GoodTools, No-Intro local)
+- provider source roots (TOSEC, GoodTools, No-Intro, MAME, MESS, Redump)
 - SeedLists output root (`SeedListsDat:OutputDirectory`)
 - SeedLists state root (`SeedListsDat:StateDirectory`)
 

@@ -31,6 +31,9 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 - TOSEC: local discovery plus optional remote index/archive workflows
 - GoodTools: local `.dat` and archive ingestion workflows
 - No-Intro: local-first ingestion with guarded remote mode and a mandatory 24-hour cooldown policy
+- MAME: local `.dat`/`.zip` ingestion for arcade machine catalog workflows
+- MESS: local `.dat`/`.zip` ingestion for software-list catalog workflows
+- Redump: local `.dat`/`.zip` ingestion for disc-preservation catalog workflows
 
 ## Quick Start
 
@@ -52,6 +55,8 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 3. Enable remote provider behavior only when needed and policy-safe.
 4. Use run manifests to verify discovered/processed/failed counts before scaling up.
 5. Tune bounded sync controls (`MaxDatsPerRun`, include/exclude patterns) for safer large library onboarding.
+
+For MAME/MESS and fruit-machine-focused onboarding, prefer `IncludeNamePatterns` filters (for example `"*fruit*"`, `"*slot*"`, `"*aristocrat*"`) to stage ingestion in narrow slices.
 
 ## Getting Best Results
 

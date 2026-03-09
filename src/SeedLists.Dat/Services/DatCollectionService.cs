@@ -116,14 +116,14 @@ public sealed class DatCollectionService(
 					TotalCount = discovered.Count,
 				});
 
-				buffer.Position = 0;
-				var parser = _parserFactory.GetParser(buffer);
+				await using var normalizedPayloadStream = new MemoryStream(payloadBytes, writable: false);
+				var parser = _parserFactory.GetParser(normalizedPayloadStream);
 				if (parser is null) {
 					throw new InvalidOperationException($"No parser available for '{metadata.Name}'.");
 				}
 
-				buffer.Position = 0;
-				var parsed = await parser.ParseAsync(buffer, Path.GetFileName(rawPath), cancellationToken: cancellationToken);
+				normalizedPayloadStream.Position = 0;
+				var parsed = await parser.ParseAsync(normalizedPayloadStream, Path.GetFileName(rawPath), cancellationToken: cancellationToken);
 				var summaryPath = Path.Combine(providerOutputDir, $"{rawName}.summary.json");
 				var summaryJson = JsonSerializer.Serialize(parsed, SummaryJsonOptions);
 				await File.WriteAllTextAsync(summaryPath, summaryJson, cancellationToken);

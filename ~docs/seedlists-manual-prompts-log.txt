@@ -23,6 +23,7 @@ push all new commits now; continue immediately with a second batch of repo-speci
 
 continue working an imnproving performance; nake sure to update and create new issues and update benchamrks, tests, and docs and instructions; continue;
 
+find MAME and MESS and other dats sources, do we have Redump? find and injest these dats! lets get the fruit machines and other stuff too!; make issues and plans and documentation updates; continue;
 
 
 

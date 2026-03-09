@@ -104,7 +104,7 @@ public sealed class Worker(
         }
 
         if (output.Count == 0) {
-            return [DatProviderKind.Tosec, DatProviderKind.GoodTools, DatProviderKind.NoIntro];
+            return [DatProviderKind.Tosec, DatProviderKind.GoodTools, DatProviderKind.NoIntro, DatProviderKind.Mame, DatProviderKind.Mess, DatProviderKind.Redump];
         }
 
         return output;

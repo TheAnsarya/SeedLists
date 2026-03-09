@@ -22,7 +22,7 @@ public sealed class CatalogSchemaContractTests {
 			.Select(item => item.GetString() ?? string.Empty)
 			.ToArray();
 
-		Assert.Equal(["Unknown", "NoIntro", "Tosec", "GoodTools"], providers);
+		Assert.Equal(["Unknown", "NoIntro", "Tosec", "GoodTools", "Mame", "Mess", "Redump"], providers);
 	}
 
 	[Fact]

@@ -1,6 +1,6 @@
 # Architecture
 
-Issue: `#24`
+Issues: `#24`, `#30`
 
 - Full docs tree: `DOCUMENTATION_INDEX.md`
 
@@ -10,7 +10,7 @@ Issue: `#24`
   - Contracts: providers, parsers, sync service abstractions
   - Models: DAT metadata, parse/sync payloads, run manifest artifacts
   - Parsing: `StreamingJsonDatParser` (canonical JSON)
-  - Providers: TOSEC, GoodTools, No-Intro
+  - Providers: TOSEC, GoodTools, No-Intro, MAME, MESS, Redump
   - Services:
     - `CatalogNormalizationService`
     - `CatalogValidationService`

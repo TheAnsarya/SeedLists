@@ -10,7 +10,7 @@ namespace SeedLists.Dat.Services;
 /// Validates JSON catalogs using SeedLists schema rules.
 /// </summary>
 public sealed partial class CatalogValidationService : ICatalogValidationService {
-	private static readonly string[] AllowedProviders = ["Unknown", "NoIntro", "Tosec", "GoodTools"];
+	private static readonly string[] AllowedProviders = ["Unknown", "NoIntro", "Tosec", "GoodTools", "Mame", "Mess", "Redump"];
 
 	public CatalogValidationResult Validate(ReadOnlySpan<byte> jsonUtf8) {
 		if (jsonUtf8.IsEmpty) {
