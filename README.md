@@ -72,6 +72,8 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 - `scripts/download-tosec-dats.ps1`
 - `scripts/download-goodtools-dats.ps1`
 - `scripts/download-nointro-dats.ps1`
+- `scripts/test-markdown-policy.ps1`
+- `scripts/benchmark-markdown-policy.ps1`
 
 No-Intro script behavior:
 
@@ -90,3 +92,8 @@ Primary operator paths:
 - `docs/INGESTION_RUNBOOK.md`
 - `docs/SYNC_MANIFESTS.md`
 - `docs/BOUNDED_SYNC_CONTROLS.md`
+
+Quality automation scripts:
+
+- `scripts/test-markdown-policy.ps1`
+- `scripts/benchmark-markdown-policy.ps1`
