@@ -23,6 +23,7 @@ This index is the canonical documentation link-tree for SeedLists.
 ## Provider Behavior and Policies
 
 - `DAT_SOURCES.md` - Provider source locations and handling policies
+- `PLEASUREDOME_PROVIDER.md` - Pleasuredome discovery, configuration, and operational behavior
 - `TOSEC_PROVIDER_HARDENING.md` - TOSEC discovery/download hardening behavior
 - `GOODTOOLS_INGESTION.md` - GoodTools local ingestion and classification behavior
 - `NOINTRO_COOLDOWN_POLICY.md` - No-Intro remote cooldown policy and persistence

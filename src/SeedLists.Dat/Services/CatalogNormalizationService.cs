@@ -30,6 +30,7 @@ public sealed partial class CatalogNormalizationService : ICatalogNormalizationS
 			DatProviderKind.Mame => TryMapXmlLikeCatalog(text, provider, sourceName),
 			DatProviderKind.Mess => TryMapXmlLikeCatalog(text, provider, sourceName),
 			DatProviderKind.Redump => TryMapXmlLikeCatalog(text, provider, sourceName),
+			DatProviderKind.PleasureDome => TryMapXmlLikeCatalog(text, provider, sourceName),
 			DatProviderKind.GoodTools => TryMapGoodToolsCatalog(text, provider, sourceName),
 			_ => null,
 		};

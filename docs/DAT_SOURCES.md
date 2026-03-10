@@ -1,6 +1,6 @@
 # DAT Sources
 
-Issues: `#24`, `#30`, `#31`, `#32`
+Issues: `#24`, `#30`, `#31`, `#32`, `#33`, `#34`
 
 SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 
@@ -84,9 +84,35 @@ SeedLists consumes normalized JSON catalogs for parser and storage workflows.
 - Primary project page:
   - `https://www.redump.org/`
 
+## PleasureDome
+
+- Local source default: `C:\~reference-roms\dats\pleasuredome`
+- Primary source index:
+  - `https://pleasuredome.github.io/pleasuredome/index.html`
+- MAME page:
+  - `https://pleasuredome.github.io/pleasuredome/mame/index.html`
+- NonMAME category index:
+  - `https://pleasuredome.github.io/pleasuredome/nonmame/index.html`
+- Configurable remote options:
+  - `SeedListsDat:PleasureDomeMameIndexUrl`
+  - `SeedListsDat:PleasureDomeNonMameIndexUrl`
+  - `SeedListsDat:PleasureDomeNonMameCategorySlugs`
+- Default category slugs:
+  - `fruitmachines`
+  - `pinball`
+  - `raine`
+- Supported local file types: `.dat`, `.zip`, `.7z`
+- Archive handling:
+  - `.zip`: extracted automatically
+  - `.7z`: currently requires manual extraction
+- Remote behavior:
+  - scrapes DAT `.zip` links from Pleasuredome category pages
+  - applies token-based change detection and poll gating (`RemotePollIntervalHours`)
+
 ## Fruit Machine Coverage
 
 - Fruit-machine catalogs are commonly present in MAME ecosystem sets (for example Aristocrat, Barcrest, JPM, and related machine families).
+- PleasureDome provides dedicated fruit-machine DAT packages under NonMAME categories.
 - Recommended onboarding strategy:
   - stage by include patterns (for example `*fruit*`, `*slot*`, `*aristocrat*`, `*barcrest*`, `*jpm*`)
   - keep bounded run caps enabled until manifests show stable pass rates

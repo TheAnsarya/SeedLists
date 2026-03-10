@@ -100,6 +100,7 @@ public sealed class CatalogNormalizationServiceTests {
 	[Theory]
 	[InlineData("tosec-sample.dat", DatProviderKind.Tosec, "Sample TOSEC Game", "sample-tosec.bin")]
 	[InlineData("nointro-sample.dat", DatProviderKind.NoIntro, "Sample NoIntro Game", "sample-nointro.bin")]
+	[InlineData("nointro-sample.dat", DatProviderKind.PleasureDome, "Sample NoIntro Game", "sample-nointro.bin")]
 	public void Normalize_MapsXmlLikeFixtureFiles(string fileName, DatProviderKind provider, string expectedGameName, string expectedRomName) {
 		var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", fileName);
 		var payload = File.ReadAllBytes(fixturePath);

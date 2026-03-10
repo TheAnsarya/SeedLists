@@ -11,4 +11,5 @@ public enum DatProviderKind {
 	Mame = 4,
 	Mess = 5,
 	Redump = 6,
+	PleasureDome = 7,
 }

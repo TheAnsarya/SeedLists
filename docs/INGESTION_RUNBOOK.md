@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`, `#30`, `#31`, `#32`
+Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`
 
 ## Documentation Context
 
@@ -17,6 +17,7 @@ Issues: `#10`, `#25`, `#30`, `#31`, `#32`
   - MAME local DATs: `C:\~reference-roms\dats\mame`
   - MESS local DATs: `C:\~reference-roms\dats\mess`
   - Redump local DATs: `C:\~reference-roms\dats\redump`
+  - PleasureDome local DATs: `C:\~reference-roms\dats\pleasuredome`
 
 ## Recommended Initial Configuration
 
@@ -33,12 +34,16 @@ Start in local-first mode and expand gradually:
     "MameLocalDirectory": "C:\\~reference-roms\\dats\\mame",
     "MessLocalDirectory": "C:\\~reference-roms\\dats\\mess",
     "RedumpLocalDirectory": "C:\\~reference-roms\\dats\\redump",
+    "PleasureDomeLocalDirectory": "C:\\~reference-roms\\dats\\pleasuredome",
     "EnableInternetDownloads": false,
     "EnableRemoteVersionChecks": true,
     "RemotePollIntervalHours": 24,
     "MameRemoteIndexUrl": "https://www.progettosnaps.net/dats/MAME/",
     "MessRemoteIndexUrl": "https://www.progettosnaps.net/dats/",
     "RedumpRemoteIndexUrl": "https://www.redump.org/downloads/",
+    "PleasureDomeMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/mame/index.html",
+    "PleasureDomeNonMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/nonmame/index.html",
+    "PleasureDomeNonMameCategorySlugs": ["fruitmachines", "pinball", "raine"],
     "GoodToolsRemoteDatUrls": [],
     "RedumpRemoteDatUrls": [],
     "FruitMachineRemoteDatUrls": [],
@@ -48,7 +53,7 @@ Start in local-first mode and expand gradually:
     "ExcludeNamePatterns": []
   },
   "Worker": {
-    "Providers": ["Tosec", "GoodTools", "NoIntro", "Mame", "Mess", "Redump"]
+    "Providers": ["Tosec", "GoodTools", "NoIntro", "Mame", "Mess", "Redump", "PleasureDome"]
   }
 }
 ```
@@ -99,6 +104,7 @@ Provider behavior references:
 
 - TOSEC: `TOSEC_PROVIDER_HARDENING.md`
 - GoodTools: `GOODTOOLS_INGESTION.md`
+- PleasureDome: `PLEASUREDOME_PROVIDER.md`
 - Source policies: `DAT_SOURCES.md`
 
 ## Troubleshooting
@@ -134,6 +140,9 @@ Provider behavior references:
   - `MameRemoteIndexUrl`
   - `MessRemoteIndexUrl`
   - `RedumpRemoteIndexUrl`
+  - `PleasureDomeMameIndexUrl`
+  - `PleasureDomeNonMameIndexUrl`
+  - `PleasureDomeNonMameCategorySlugs`
   - `GoodToolsRemoteDatUrls`
   - `RedumpRemoteDatUrls`
   - `FruitMachineRemoteDatUrls`

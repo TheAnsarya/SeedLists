@@ -34,6 +34,7 @@ Output artifacts are written under `SeedListsDat:OutputDirectory` per provider.
 - MAME: local `.dat`/`.zip` ingestion plus optional remote index polling/version checks
 - MESS: local `.dat`/`.zip` ingestion plus optional remote index polling/version checks
 - Redump: local `.dat`/`.zip` ingestion plus optional remote index/manual URL polling/version checks
+- PleasureDome: local `.dat`/`.zip` ingestion plus remote MAME/non-MAME DAT page discovery (fruit machines, pinball, raine)
 
 ## Quick Start
 
@@ -68,6 +69,9 @@ Use these options to auto-discover and auto-download only changed remote DAT sou
 - `SeedListsDat:MameRemoteIndexUrl`: MAME remote index page
 - `SeedListsDat:MessRemoteIndexUrl`: MESS remote index page
 - `SeedListsDat:RedumpRemoteIndexUrl`: Redump remote index page
+- `SeedListsDat:PleasureDomeMameIndexUrl`: Pleasuredome MAME DAT page
+- `SeedListsDat:PleasureDomeNonMameIndexUrl`: Pleasuredome NonMAME category index page
+- `SeedListsDat:PleasureDomeNonMameCategorySlugs`: NonMAME categories to include (for example `fruitmachines`, `pinball`, `raine`)
 - `SeedListsDat:GoodToolsRemoteDatUrls`: direct GoodTools DAT/ZIP URLs
 - `SeedListsDat:RedumpRemoteDatUrls`: fallback direct Redump DAT/ZIP URLs
 - `SeedListsDat:FruitMachineRemoteDatUrls`: optional fruit-machine DAT/ZIP URLs staged via include patterns

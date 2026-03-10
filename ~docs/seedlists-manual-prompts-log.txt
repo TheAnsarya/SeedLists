@@ -27,6 +27,8 @@ find MAME and MESS and other dats sources, do we have Redump? find and injest th
 
 No, I want auto-downloaders for MAME/MESS/Redump/fruit-machine/others like tosec and no-intro and goodtools, etc; find online sources and use them to download on a schedule or after checking for a new version; continue;
 
+[SeedLists] there are MAME and fruit and pinball and raine, etc. `*.dat`s available at `https://pleasuredome.github.io/pleasuredome/index.html` use this data source in the injestion engine. Make issues (epics and sub issues) and docs and benchmarks and tests and plans and instructions; git commit before and after; make issues before implementing the work; make sure performance and memory usage is great and test everything for correctness; continue;
+
 
 
 
