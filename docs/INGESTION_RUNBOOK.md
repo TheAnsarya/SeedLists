@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`, `#38`, `#39`, `#40`, `#41`, `#43`
+Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`, `#38`, `#39`, `#40`, `#41`, `#43`, `#44`, `#45`, `#46`, `#47`
 
 ## Documentation Context
 
@@ -171,8 +171,16 @@ Use summary files to inspect parsed content and manifests to monitor health, thr
 - Inspect latest entries:
   - query `ingestion_records` for provider/source/hashes/path metadata
   - query `normalized_catalogs` for normalized JSON payload storage
+  - query `ingestion_failures` for failed attempts, stage classification, and error messages
 - Verify source file hierarchy exists:
   - `{OutputDirectory}/{provider}/ingested-sources/{system}/{yyyy}/{MM}/{dd}/`
+
+Useful operator checks:
+
+- by most recent failure:
+  - `SELECT provider, source_name, stage, error_message, failed_at_utc FROM ingestion_failures ORDER BY id DESC LIMIT 20;`
+- by failure trend:
+  - `SELECT provider, stage, COUNT(*) AS failures FROM ingestion_failures GROUP BY provider, stage ORDER BY failures DESC;`
 
 ## Run Artifacts
 

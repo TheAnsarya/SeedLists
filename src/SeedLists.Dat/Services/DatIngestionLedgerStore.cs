@@ -40,6 +40,69 @@ public sealed class DatIngestionLedgerStore {
 		await transaction.CommitAsync(cancellationToken);
 	}
 
+	public async Task WriteFailureAsync(string databasePath, DatIngestionFailureEntry entry, CancellationToken cancellationToken = default) {
+		ArgumentException.ThrowIfNullOrWhiteSpace(databasePath);
+		ArgumentNullException.ThrowIfNull(entry);
+
+		var parent = Path.GetDirectoryName(databasePath);
+		if (!string.IsNullOrWhiteSpace(parent)) {
+			Directory.CreateDirectory(parent);
+		}
+
+		var connectionBuilder = new SqliteConnectionStringBuilder {
+			DataSource = databasePath,
+			Mode = SqliteOpenMode.ReadWriteCreate,
+		};
+
+		await using var connection = new SqliteConnection(connectionBuilder.ToString());
+		await connection.OpenAsync(cancellationToken);
+
+		await EnablePragmasAsync(connection, cancellationToken);
+		await EnsureSchemaAsync(connection, databasePath, cancellationToken);
+
+		var command = connection.CreateCommand();
+		command.CommandText = """
+			INSERT INTO ingestion_failures (
+				failed_at_utc,
+				provider,
+				system_name,
+				source_identifier,
+				source_url,
+				source_name,
+				source_version,
+				source_last_updated_utc,
+				source_reported_size,
+				stage,
+				error_message)
+			VALUES (
+				$failedAtUtc,
+				$provider,
+				$systemName,
+				$sourceIdentifier,
+				$sourceUrl,
+				$sourceName,
+				$sourceVersion,
+				$sourceLastUpdatedUtc,
+				$sourceReportedSize,
+				$stage,
+				$errorMessage);
+			""";
+
+		command.Parameters.AddWithValue("$failedAtUtc", entry.FailedAtUtc.UtcDateTime.ToString("O", CultureInfo.InvariantCulture));
+		command.Parameters.AddWithValue("$provider", entry.Provider);
+		command.Parameters.AddWithValue("$systemName", entry.System ?? string.Empty);
+		command.Parameters.AddWithValue("$sourceIdentifier", entry.SourceIdentifier);
+		command.Parameters.AddWithValue("$sourceUrl", entry.SourceUrl ?? string.Empty);
+		command.Parameters.AddWithValue("$sourceName", entry.SourceName);
+		command.Parameters.AddWithValue("$sourceVersion", entry.SourceVersion ?? string.Empty);
+		command.Parameters.AddWithValue("$sourceLastUpdatedUtc", entry.SourceLastUpdatedUtc?.UtcDateTime.ToString("O", CultureInfo.InvariantCulture) ?? string.Empty);
+		command.Parameters.AddWithValue("$sourceReportedSize", entry.SourceReportedSize ?? 0L);
+		command.Parameters.AddWithValue("$stage", entry.Stage);
+		command.Parameters.AddWithValue("$errorMessage", entry.ErrorMessage);
+
+		await command.ExecuteNonQueryAsync(cancellationToken);
+	}
+
 	private static async Task EnablePragmasAsync(SqliteConnection connection, CancellationToken cancellationToken) {
 		var command = connection.CreateCommand();
 		command.CommandText = "PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;";
@@ -91,6 +154,23 @@ public sealed class DatIngestionLedgerStore {
 
 			CREATE INDEX IF NOT EXISTS idx_ingestion_records_provider_time ON ingestion_records(provider, ingested_at_utc);
 			CREATE INDEX IF NOT EXISTS idx_normalized_catalogs_ingestion_id ON normalized_catalogs(ingestion_record_id);
+
+			CREATE TABLE IF NOT EXISTS ingestion_failures (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				failed_at_utc TEXT NOT NULL,
+				provider TEXT NOT NULL,
+				system_name TEXT,
+				source_identifier TEXT NOT NULL,
+				source_url TEXT,
+				source_name TEXT NOT NULL,
+				source_version TEXT,
+				source_last_updated_utc TEXT,
+				source_reported_size INTEGER,
+				stage TEXT NOT NULL,
+				error_message TEXT NOT NULL
+			);
+
+			CREATE INDEX IF NOT EXISTS idx_ingestion_failures_provider_time ON ingestion_failures(provider, failed_at_utc);
 			""";
 
 		await command.ExecuteNonQueryAsync(cancellationToken);
@@ -232,6 +312,23 @@ public sealed record DatIngestionLedgerEntry {
 	public required string Sha1 { get; init; }
 	public required string Sha256 { get; init; }
 	public required byte[] NormalizedCatalogUtf8 { get; init; }
+	public string? System { get; init; }
+	public string? SourceUrl { get; init; }
+	public string? SourceVersion { get; init; }
+	public DateTimeOffset? SourceLastUpdatedUtc { get; init; }
+	public long? SourceReportedSize { get; init; }
+}
+
+/// <summary>
+/// Database write model for a failed DAT ingestion attempt.
+/// </summary>
+public sealed record DatIngestionFailureEntry {
+	public required DateTimeOffset FailedAtUtc { get; init; }
+	public required string Provider { get; init; }
+	public required string SourceIdentifier { get; init; }
+	public required string SourceName { get; init; }
+	public required string Stage { get; init; }
+	public required string ErrorMessage { get; init; }
 	public string? System { get; init; }
 	public string? SourceUrl { get; init; }
 	public string? SourceVersion { get; init; }

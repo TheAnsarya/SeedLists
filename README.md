@@ -4,7 +4,7 @@ SeedLists is a JSON-first .NET 10 ingestion and normalization toolkit for ROM DA
 
 It is designed to turn mixed provider inputs (local DAT files, local archives, and optional remote provider payloads) into a consistent canonical JSON catalog format, then validate, parse, and persist operator-friendly run artifacts.
 
-SeedLists also persists successful ingestion records into SQLite, including source file metadata, basic hashes, and normalized catalog payloads.
+SeedLists also persists ingestion audit records into SQLite, including successful ingestion metadata and failure audit rows (provider/system/source/stage/error).
 
 ## What SeedLists Does With Your Data
 

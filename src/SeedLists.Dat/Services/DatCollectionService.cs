@@ -68,6 +68,7 @@ public sealed class DatCollectionService(
 		var errors = new List<string>();
 		var processed = 0;
 		var failed = 0;
+		var ingestionDatabasePath = ResolveIngestionDatabasePath();
 
 		progress?.Report(new DatSyncProgress {
 			Provider = provider,
@@ -136,7 +137,7 @@ public sealed class DatCollectionService(
 				await File.WriteAllTextAsync(summaryPath, summaryJson, cancellationToken);
 
 				await _ingestionLedgerStore.WriteAsync(
-					ResolveIngestionDatabasePath(),
+					ingestionDatabasePath,
 					new DatIngestionLedgerEntry {
 						IngestedAtUtc = DateTimeOffset.UtcNow,
 						Provider = provider.ToString(),
@@ -176,6 +177,27 @@ public sealed class DatCollectionService(
 				failed++;
 				errors.Add($"{metadata.Name}: {ex.Message}");
 				sourceStatuses[i] = sourceStatuses[i] with { Status = "failed", Error = ex.Message };
+
+				try {
+					await _ingestionLedgerStore.WriteFailureAsync(
+						ingestionDatabasePath,
+						new DatIngestionFailureEntry {
+							FailedAtUtc = DateTimeOffset.UtcNow,
+							Provider = provider.ToString(),
+							System = metadata.System,
+							SourceIdentifier = metadata.Identifier,
+							SourceUrl = metadata.DownloadUrl,
+							SourceName = metadata.Name,
+							SourceVersion = metadata.Version,
+							SourceLastUpdatedUtc = metadata.LastUpdated,
+							SourceReportedSize = metadata.FileSize,
+							Stage = ResolveFailureStage(ex),
+							ErrorMessage = ex.Message,
+						},
+						cancellationToken);
+				} catch (Exception ledgerEx) {
+					errors.Add($"{metadata.Name}: failure-audit logging error: {ledgerEx.Message}");
+				}
 			}
 		}
 
@@ -232,6 +254,31 @@ public sealed class DatCollectionService(
 		}
 
 		return changed ? new string(chars) : name;
+	}
+
+	private static string ResolveFailureStage(Exception ex) {
+		var message = ex.Message;
+		if (message.Contains("validation", StringComparison.OrdinalIgnoreCase)) {
+			return "validation";
+		}
+
+		if (message.Contains("parser", StringComparison.OrdinalIgnoreCase)
+			|| message.Contains("parse", StringComparison.OrdinalIgnoreCase)) {
+			return "parsing";
+		}
+
+		if (message.Contains("download", StringComparison.OrdinalIgnoreCase)
+			|| ex is HttpRequestException) {
+			return "download";
+		}
+
+		if (message.Contains("write", StringComparison.OrdinalIgnoreCase)
+			|| message.Contains("save", StringComparison.OrdinalIgnoreCase)
+			|| ex is IOException) {
+			return "persistence";
+		}
+
+		return "sync";
 	}
 
 	private async Task<SavedSourceArtifact> SaveSourceArtifactAsync(

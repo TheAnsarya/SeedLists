@@ -31,6 +31,7 @@ No, I want auto-downloaders for MAME/MESS/Redump/fruit-machine/others like tosec
 
 [SeedLists] Log all injestions of dat files into a sqlite database (datetime added, url, filename, source provider, system, file info(name, dates, size), basic hashes of the the file) and also the file themselves should be saved in a folder hierarchy; are we also putting all normalized/converted dat contents into a  database as well as json files? we are supposed to be; make issues (epics and subissues) and plans and documents, etc, and implement all of that; make issues before doing the work; continue;
 
+[SeedLists] implement all issues and make new issues; continue;
 
 
 

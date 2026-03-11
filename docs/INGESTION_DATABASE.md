@@ -1,8 +1,8 @@
 # Ingestion Database
 
-Issues: `#38`, `#39`, `#40`, `#41`, `#43`
+Issues: `#38`, `#39`, `#40`, `#41`, `#43`, `#44`, `#45`, `#46`, `#47`
 
-SeedLists now records successful DAT ingestions into SQLite while still writing normalized JSON and summary files to disk.
+SeedLists records successful DAT ingestions and failed ingestion attempts into SQLite while still writing normalized JSON and summary files to disk.
 
 ## Database Location
 
@@ -30,6 +30,14 @@ For each successfully processed source:
 - basic file hashes (`crc32`, `md5`, `sha1`, `sha256`)
 - normalized JSON catalog payload (in SQLite)
 - normalized JSON path and summary path (on disk)
+
+For each failed source attempt:
+
+- failure timestamp (UTC)
+- source provider and system
+- source identifier, URL, file name, version metadata
+- failure stage classification (`download`, `validation`, `parsing`, `persistence`, `sync`)
+- error message
 
 ## Source File Hierarchy
 
@@ -73,6 +81,21 @@ This allows deterministic traceability and replay for audited ingestions.
 - `normalized_bytes`
 - `created_at_utc`
 
+### `ingestion_failures`
+
+- `id` (PK)
+- `failed_at_utc`
+- `provider`
+- `system_name`
+- `source_identifier`
+- `source_url`
+- `source_name`
+- `source_version`
+- `source_last_updated_utc`
+- `source_reported_size`
+- `stage`
+- `error_message`
+
 ## Example Queries
 
 ```sql
@@ -95,6 +118,20 @@ SELECT provider, COUNT(*) AS ingestions
 FROM ingestion_records
 GROUP BY provider
 ORDER BY ingestions DESC;
+```
+
+```sql
+SELECT provider, stage, source_name, error_message, failed_at_utc
+FROM ingestion_failures
+ORDER BY id DESC
+LIMIT 20;
+```
+
+```sql
+SELECT provider, stage, COUNT(*) AS failures
+FROM ingestion_failures
+GROUP BY provider, stage
+ORDER BY failures DESC;
 ```
 
 ## Validation Command

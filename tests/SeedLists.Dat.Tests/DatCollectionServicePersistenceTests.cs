@@ -97,6 +97,50 @@ public sealed class DatCollectionServicePersistenceTests {
 		}
 	}
 
+	[Fact]
+	public async Task SyncProviderAsync_PersistsFailureAttemptsInSqliteLedger() {
+		var outputDirectory = CreateTempDirectory();
+		try {
+			var databasePath = Path.Combine(outputDirectory, "ingestion", "ingestion-ledger.sqlite");
+			var service = new DatCollectionService(
+				[new FailureProvider()],
+				new DatParserFactory([new StreamingJsonDatParser()]),
+				new CatalogNormalizationService(),
+				new CatalogValidationService(),
+				Microsoft.Extensions.Options.Options.Create(new SeedListsDatOptions {
+					OutputDirectory = outputDirectory,
+					IngestionDatabasePath = "ingestion/ingestion-ledger.sqlite",
+				}));
+
+			var report = await service.SyncProviderAsync(DatProviderKind.PleasureDome, forceRefresh: false);
+
+			Assert.Equal(1, report.DatsDiscovered);
+			Assert.Equal(0, report.DatsProcessed);
+			Assert.Equal(1, report.DatsFailed);
+			Assert.True(File.Exists(databasePath));
+
+			await using var connection = new SqliteConnection($"Data Source={databasePath}");
+			await connection.OpenAsync();
+
+			var failureCommand = connection.CreateCommand();
+			failureCommand.CommandText = """
+				SELECT provider, system_name, source_name, stage, error_message
+				FROM ingestion_failures
+				LIMIT 1;
+				""";
+
+			await using var reader = await failureCommand.ExecuteReaderAsync();
+			Assert.True(await reader.ReadAsync());
+			Assert.Equal("PleasureDome", reader.GetString(0));
+			Assert.Equal("Raine", reader.GetString(1));
+			Assert.Equal("Raine-0.97.5", reader.GetString(2));
+			Assert.Equal("download", reader.GetString(3));
+			Assert.Contains("simulated download failure", reader.GetString(4), StringComparison.Ordinal);
+		} finally {
+			DeleteTempDirectory(outputDirectory);
+		}
+	}
+
 	private static string CreateTempDirectory() {
 		var path = Path.Combine(Path.GetTempPath(), "SeedLists.Tests", Guid.NewGuid().ToString("N"));
 		Directory.CreateDirectory(path);
@@ -152,6 +196,35 @@ public sealed class DatCollectionServicePersistenceTests {
 
 		public bool SupportsIdentifier(string identifier) {
 			return identifier == "persist-source";
+		}
+	}
+
+	private sealed class FailureProvider : IDatProvider {
+		public DatProviderKind ProviderType => DatProviderKind.PleasureDome;
+
+		public Task<IReadOnlyList<DatMetadata>> ListAvailableAsync(CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			return Task.FromResult<IReadOnlyList<DatMetadata>>([
+				new DatMetadata {
+					Identifier = "failure-source",
+					Name = "Raine-0.97.5",
+					Description = "Pleasuredome raine source",
+					System = "Raine",
+					DownloadUrl = "https://example.invalid/pleasuredome/raine.zip",
+					LastUpdated = DateTimeOffset.UtcNow,
+					FileSize = 321,
+				}
+			]);
+		}
+
+		public Task<Stream> DownloadDatAsync(string identifier, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			_ = identifier;
+			throw new HttpRequestException("simulated download failure");
+		}
+
+		public bool SupportsIdentifier(string identifier) {
+			return identifier == "failure-source";
 		}
 	}
 }

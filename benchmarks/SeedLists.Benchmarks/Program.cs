@@ -373,14 +373,26 @@ public class IngestionPersistenceBenchmark {
 		}
 	}
 
-	private static DatCollectionService CreateService(string tempRoot, int gameCount) {
+	[Benchmark]
+	public async Task<int> SyncMixedBatch_WithFailureAuditLogging() {
+		var tempRoot = CreateTempDirectory();
+		try {
+			var service = CreateService(tempRoot, gameCount: 10, failEvery: 3);
+			var report = await service.SyncProviderAsync(DatProviderKind.PleasureDome, forceRefresh: false);
+			return report.DatsFailed;
+		} finally {
+			DeleteTempDirectory(tempRoot);
+		}
+	}
+
+	private static DatCollectionService CreateService(string tempRoot, int gameCount, int failEvery = 0) {
 		var options = Microsoft.Extensions.Options.Options.Create(new SeedListsDatOptions {
 			OutputDirectory = Path.Combine(tempRoot, "output"),
 			IngestionDatabasePath = Path.Combine(tempRoot, "db", "ingestion-ledger.sqlite"),
 		});
 
 		return new DatCollectionService(
-			[new BenchmarkPersistenceProvider(gameCount)],
+			[new BenchmarkPersistenceProvider(gameCount, failEvery)],
 			new DatParserFactory([new StreamingJsonDatParser()]),
 			new CatalogNormalizationService(),
 			new CatalogValidationService(),
@@ -405,8 +417,9 @@ public class IngestionPersistenceBenchmark {
 		}
 	}
 
-	private sealed class BenchmarkPersistenceProvider(int datCount) : IDatProvider {
+	private sealed class BenchmarkPersistenceProvider(int datCount, int failEvery) : IDatProvider {
 		private readonly int _datCount = Math.Max(1, datCount);
+		private readonly int _failEvery = Math.Max(0, failEvery);
 
 		public DatProviderKind ProviderType => DatProviderKind.PleasureDome;
 
@@ -429,6 +442,10 @@ public class IngestionPersistenceBenchmark {
 
 		public Task<Stream> DownloadDatAsync(string identifier, CancellationToken cancellationToken = default) {
 			_ = cancellationToken;
+			if (_failEvery > 0 && TryParseBenchIndex(identifier, out var index) && (index + 1) % _failEvery == 0) {
+				throw new HttpRequestException($"simulated benchmark failure for {identifier}");
+			}
+
 			var json = $$"""
 				{
 					"name": "{{identifier}}",
@@ -453,6 +470,15 @@ public class IngestionPersistenceBenchmark {
 
 		public bool SupportsIdentifier(string identifier) {
 			return identifier.StartsWith("bench-", StringComparison.OrdinalIgnoreCase);
+		}
+
+		private static bool TryParseBenchIndex(string identifier, out int index) {
+			index = 0;
+			if (!identifier.StartsWith("bench-", StringComparison.OrdinalIgnoreCase)) {
+				return false;
+			}
+
+			return int.TryParse(identifier["bench-".Length..], out index);
 		}
 	}
 }
