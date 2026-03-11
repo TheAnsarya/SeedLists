@@ -29,6 +29,7 @@ No, I want auto-downloaders for MAME/MESS/Redump/fruit-machine/others like tosec
 
 [SeedLists] there are MAME and fruit and pinball and raine, etc. `*.dat`s available at `https://pleasuredome.github.io/pleasuredome/index.html` use this data source in the injestion engine. Make issues (epics and sub issues) and docs and benchmarks and tests and plans and instructions; git commit before and after; make issues before implementing the work; make sure performance and memory usage is great and test everything for correctness; continue;
 
+[SeedLists] Log all injestions of dat files into a sqlite database (datetime added, url, filename, source provider, system, file info(name, dates, size), basic hashes of the the file) and also the file themselves should be saved in a folder hierarchy; are we also putting all normalized/converted dat contents into a  database as well as json files? we are supposed to be; make issues (epics and subissues) and plans and documents, etc, and implement all of that; make issues before doing the work; continue;
 
 
 

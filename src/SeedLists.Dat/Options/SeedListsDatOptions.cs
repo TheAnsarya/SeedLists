@@ -5,6 +5,7 @@ namespace SeedLists.Dat.Options;
 /// </summary>
 public sealed class SeedListsDatOptions {
 	public string OutputDirectory { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SeedLists", "dats");
+	public string IngestionDatabasePath { get; set; } = "ingestion\\ingestion-ledger.sqlite";
 	public string TosecLocalDirectory { get; set; } = @"D:\Roms\TOSEC";
 	public string GoodToolsLocalDirectory { get; set; } = @"C:\~reference-roms\roms";
 	public string NoIntroLocalDirectory { get; set; } = @"C:\~reference-roms\dats\nointro";

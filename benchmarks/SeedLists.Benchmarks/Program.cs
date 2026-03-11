@@ -345,3 +345,114 @@ public class PleasureDomeDiscoveryBenchmark {
 		}
 	}
 }
+
+[MemoryDiagnoser]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+public class IngestionPersistenceBenchmark {
+	[Benchmark(Baseline = true)]
+	public async Task<int> SyncSingleDat_WithSqlitePersistence() {
+		var tempRoot = CreateTempDirectory();
+		try {
+			var service = CreateService(tempRoot, gameCount: 1);
+			var report = await service.SyncProviderAsync(DatProviderKind.PleasureDome, forceRefresh: false);
+			return report.DatsProcessed;
+		} finally {
+			DeleteTempDirectory(tempRoot);
+		}
+	}
+
+	[Benchmark]
+	public async Task<int> SyncTenDats_WithSqlitePersistence() {
+		var tempRoot = CreateTempDirectory();
+		try {
+			var service = CreateService(tempRoot, gameCount: 10);
+			var report = await service.SyncProviderAsync(DatProviderKind.PleasureDome, forceRefresh: false);
+			return report.DatsProcessed;
+		} finally {
+			DeleteTempDirectory(tempRoot);
+		}
+	}
+
+	private static DatCollectionService CreateService(string tempRoot, int gameCount) {
+		var options = Microsoft.Extensions.Options.Options.Create(new SeedListsDatOptions {
+			OutputDirectory = Path.Combine(tempRoot, "output"),
+			IngestionDatabasePath = Path.Combine(tempRoot, "db", "ingestion-ledger.sqlite"),
+		});
+
+		return new DatCollectionService(
+			[new BenchmarkPersistenceProvider(gameCount)],
+			new DatParserFactory([new StreamingJsonDatParser()]),
+			new CatalogNormalizationService(),
+			new CatalogValidationService(),
+			options);
+	}
+
+	private static string CreateTempDirectory() {
+		var path = Path.Combine(Path.GetTempPath(), "SeedLists.Benchmarks", Guid.NewGuid().ToString("N"));
+		Directory.CreateDirectory(path);
+		return path;
+	}
+
+	private static void DeleteTempDirectory(string path) {
+		if (!Directory.Exists(path)) {
+			return;
+		}
+
+		try {
+			Directory.Delete(path, recursive: true);
+		} catch {
+			// Best effort cleanup for benchmark temp folders.
+		}
+	}
+
+	private sealed class BenchmarkPersistenceProvider(int datCount) : IDatProvider {
+		private readonly int _datCount = Math.Max(1, datCount);
+
+		public DatProviderKind ProviderType => DatProviderKind.PleasureDome;
+
+		public Task<IReadOnlyList<DatMetadata>> ListAvailableAsync(CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			var output = new List<DatMetadata>(_datCount);
+			for (var i = 0; i < _datCount; i++) {
+				output.Add(new DatMetadata {
+					Identifier = $"bench-{i}",
+					Name = $"pleasuredome-bench-{i:000}",
+					System = "benchmark",
+					DownloadUrl = $"https://example.invalid/pd/bench-{i:000}.zip",
+					FileSize = 256,
+					LastUpdated = DateTimeOffset.UtcNow,
+				});
+			}
+
+			return Task.FromResult<IReadOnlyList<DatMetadata>>(output);
+		}
+
+		public Task<Stream> DownloadDatAsync(string identifier, CancellationToken cancellationToken = default) {
+			_ = cancellationToken;
+			var json = $$"""
+				{
+					"name": "{{identifier}}",
+					"provider": "PleasureDome",
+					"games": [
+						{
+							"name": "Sample",
+							"roms": [
+								{
+									"name": "sample.bin",
+									"size": 16,
+									"crc32": "0ca6e4a0"
+								}
+							]
+						}
+					]
+				}
+				""";
+
+			return Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes(json), writable: false));
+		}
+
+		public bool SupportsIdentifier(string identifier) {
+			return identifier.StartsWith("bench-", StringComparison.OrdinalIgnoreCase);
+		}
+	}
+}

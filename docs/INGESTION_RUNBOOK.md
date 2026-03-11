@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`
+Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`, `#38`, `#39`, `#40`, `#41`, `#43`
 
 ## Documentation Context
 
@@ -27,6 +27,7 @@ Start in local-first mode and expand gradually:
 {
   "SeedListsDat": {
     "OutputDirectory": "C:\\SeedLists\\output",
+    "IngestionDatabasePath": "ingestion/ingestion-ledger.sqlite",
     "StateDirectory": "C:\\SeedLists\\state",
     "TosecLocalDirectory": "D:\\Roms\\TOSEC",
     "GoodToolsLocalDirectory": "C:\\~reference-roms\\roms",
@@ -106,6 +107,7 @@ Provider behavior references:
 - GoodTools: `GOODTOOLS_INGESTION.md`
 - PleasureDome: `PLEASUREDOME_PROVIDER.md`
 - Source policies: `DAT_SOURCES.md`
+- Ingestion database: `INGESTION_DATABASE.md`
 
 ## Troubleshooting
 
@@ -160,6 +162,17 @@ Provider behavior references:
   - `{OutputDirectory}/{provider}/run-manifests/{runId}-{provider}-sync-manifest.json`
 
 Use summary files to inspect parsed content and manifests to monitor health, throughput, and failures.
+
+## Ingestion Database Validation
+
+- Confirm ingestion ledger file exists:
+  - relative path: `{OutputDirectory}/{IngestionDatabasePath}`
+  - absolute path: exactly `IngestionDatabasePath`
+- Inspect latest entries:
+  - query `ingestion_records` for provider/source/hashes/path metadata
+  - query `normalized_catalogs` for normalized JSON payload storage
+- Verify source file hierarchy exists:
+  - `{OutputDirectory}/{provider}/ingested-sources/{system}/{yyyy}/{MM}/{dd}/`
 
 ## Run Artifacts
 

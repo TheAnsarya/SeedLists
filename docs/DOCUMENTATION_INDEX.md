@@ -33,6 +33,7 @@ This index is the canonical documentation link-tree for SeedLists.
 - `INGESTION_RUNBOOK.md` - Operational workflow and troubleshooting
 - `SYNC_MANIFESTS.md` - Per-run manifest artifact schema and usage
 - `BOUNDED_SYNC_CONTROLS.md` - Max-run and include/exclude source controls
+- `INGESTION_DATABASE.md` - SQLite ingestion ledger schema, behavior, and query examples
 
 ## Quality, Testing, and Regression Safety
 
@@ -40,6 +41,7 @@ This index is the canonical documentation link-tree for SeedLists.
 - `MALFORMED_FIXTURE_STRATEGY.md` - Malformed payload resilience strategy
 - `NORMALIZATION_BENCHMARKS.md` - Normalization performance baselines and budgets
 - `PARSER_BENCHMARKS.md` - Parser performance baselines and budgets
+- `INGESTION_PERSISTENCE_BENCHMARKS.md` - Ingestion persistence overhead and allocation guardrails
 
 ## Navigation Guarantee
 

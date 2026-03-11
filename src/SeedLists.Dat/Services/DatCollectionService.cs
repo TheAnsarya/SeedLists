@@ -2,6 +2,7 @@ using SeedLists.Dat.Abstractions;
 using SeedLists.Dat.Models;
 using SeedLists.Dat.Options;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,6 +18,7 @@ public sealed class DatCollectionService(
 	ICatalogValidationService validationService,
 	IOptions<SeedListsDatOptions> options) : IDatCollectionService {
 	private static readonly HashSet<char> InvalidFileNameChars = [.. Path.GetInvalidFileNameChars()];
+	private static readonly uint[] Crc32Table = BuildCrc32Table();
 
 	private static readonly JsonSerializerOptions JsonOptions = new() {
 		WriteIndented = true,
@@ -33,6 +35,7 @@ public sealed class DatCollectionService(
 	private readonly ICatalogNormalizationService _normalizationService = normalizationService;
 	private readonly ICatalogValidationService _validationService = validationService;
 	private readonly SeedListsDatOptions _options = options.Value;
+	private readonly DatIngestionLedgerStore _ingestionLedgerStore = new();
 
 	public async Task<DatSyncReport> SyncProviderAsync(
 		DatProviderKind provider,
@@ -94,8 +97,12 @@ public sealed class DatCollectionService(
 					throw new InvalidOperationException("Unable to read DAT payload buffer.");
 				}
 
+				var sourcePayload = new ReadOnlyMemory<byte>(sourceSegment.Array!, sourceSegment.Offset, (int)buffer.Length);
+				var sourceArtifact = await SaveSourceArtifactAsync(providerOutputDir, metadata, sourcePayload, cancellationToken);
+				var hashes = ComputeSourceHashes(sourcePayload.Span);
+
 				var payloadBytes = _normalizationService.Normalize(
-					sourceSegment.AsSpan(0, (int)buffer.Length),
+					sourcePayload.Span,
 					provider,
 					metadata.Name);
 
@@ -105,8 +112,8 @@ public sealed class DatCollectionService(
 				}
 
 				var rawName = SafeFileName(metadata.Name);
-				var rawPath = Path.Combine(providerOutputDir, $"{rawName}.dat");
-				await File.WriteAllBytesAsync(rawPath, payloadBytes, cancellationToken);
+				var normalizedPath = Path.Combine(providerOutputDir, $"{rawName}.dat");
+				await File.WriteAllBytesAsync(normalizedPath, payloadBytes, cancellationToken);
 
 				progress?.Report(new DatSyncProgress {
 					Provider = provider,
@@ -123,10 +130,37 @@ public sealed class DatCollectionService(
 				}
 
 				normalizedPayloadStream.Position = 0;
-				var parsed = await parser.ParseAsync(normalizedPayloadStream, Path.GetFileName(rawPath), cancellationToken: cancellationToken);
+				var parsed = await parser.ParseAsync(normalizedPayloadStream, Path.GetFileName(normalizedPath), cancellationToken: cancellationToken);
 				var summaryPath = Path.Combine(providerOutputDir, $"{rawName}.summary.json");
 				var summaryJson = JsonSerializer.Serialize(parsed, SummaryJsonOptions);
 				await File.WriteAllTextAsync(summaryPath, summaryJson, cancellationToken);
+
+				await _ingestionLedgerStore.WriteAsync(
+					ResolveIngestionDatabasePath(),
+					new DatIngestionLedgerEntry {
+						IngestedAtUtc = DateTimeOffset.UtcNow,
+						Provider = provider.ToString(),
+						System = metadata.System,
+						SourceIdentifier = metadata.Identifier,
+						SourceUrl = metadata.DownloadUrl,
+						SourceName = metadata.Name,
+						SourceVersion = metadata.Version,
+						SourceLastUpdatedUtc = metadata.LastUpdated,
+						SourceReportedSize = metadata.FileSize,
+						SavedSourcePath = sourceArtifact.FullPath,
+						SavedSourceFileName = sourceArtifact.FileName,
+						SavedSourceSize = sourceArtifact.Size,
+						SavedSourceCreatedUtc = sourceArtifact.CreatedUtc,
+						SavedSourceModifiedUtc = sourceArtifact.ModifiedUtc,
+						SavedNormalizedPath = normalizedPath,
+						SavedSummaryPath = summaryPath,
+						Crc32 = hashes.Crc32,
+						Md5 = hashes.Md5,
+						Sha1 = hashes.Sha1,
+						Sha256 = hashes.Sha256,
+						NormalizedCatalogUtf8 = payloadBytes,
+					},
+					cancellationToken);
 
 				processed++;
 				sourceStatuses[i] = sourceStatuses[i] with { Status = "processed", Error = null };
@@ -199,6 +233,121 @@ public sealed class DatCollectionService(
 
 		return changed ? new string(chars) : name;
 	}
+
+	private async Task<SavedSourceArtifact> SaveSourceArtifactAsync(
+		string providerOutputDirectory,
+		DatMetadata metadata,
+		ReadOnlyMemory<byte> payload,
+		CancellationToken cancellationToken) {
+		var capturedAt = DateTimeOffset.UtcNow;
+		var systemSegment = SafeFileName(string.IsNullOrWhiteSpace(metadata.System) ? "unknown" : metadata.System);
+		if (string.IsNullOrWhiteSpace(systemSegment)) {
+			systemSegment = "unknown";
+		}
+
+		var hierarchyDirectory = Path.Combine(
+			providerOutputDirectory,
+			"ingested-sources",
+			systemSegment,
+			capturedAt.ToString("yyyy"),
+			capturedAt.ToString("MM"),
+			capturedAt.ToString("dd"));
+
+		Directory.CreateDirectory(hierarchyDirectory);
+
+		var baseName = SafeFileName(metadata.Name);
+		if (string.IsNullOrWhiteSpace(baseName)) {
+			baseName = "source";
+		}
+
+		var extension = ResolveSourceExtension(metadata);
+		var sourceFileName = $"{baseName}-{capturedAt:HHmmssfff}{extension}";
+		var sourcePath = Path.Combine(hierarchyDirectory, sourceFileName);
+
+		await using (var destination = new FileStream(sourcePath, FileMode.Create, FileAccess.Write, FileShare.Read)) {
+			await destination.WriteAsync(payload, cancellationToken);
+		}
+
+		var info = new FileInfo(sourcePath);
+		return new SavedSourceArtifact(
+			sourcePath,
+			sourceFileName,
+			info.Length,
+			info.CreationTimeUtc,
+			info.LastWriteTimeUtc);
+	}
+
+	private string ResolveIngestionDatabasePath() {
+		if (string.IsNullOrWhiteSpace(_options.IngestionDatabasePath)) {
+			return Path.Combine(_options.OutputDirectory, "ingestion", "ingestion-ledger.sqlite");
+		}
+
+		if (Path.IsPathRooted(_options.IngestionDatabasePath)) {
+			return _options.IngestionDatabasePath;
+		}
+
+		return Path.Combine(_options.OutputDirectory, _options.IngestionDatabasePath);
+	}
+
+	private static string ResolveSourceExtension(DatMetadata metadata) {
+		if (!string.IsNullOrWhiteSpace(metadata.DownloadUrl) && Uri.TryCreate(metadata.DownloadUrl, UriKind.Absolute, out var uri)) {
+			var fromUrl = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
+			if (!string.IsNullOrWhiteSpace(fromUrl)) {
+				return fromUrl;
+			}
+		}
+
+		var fromName = Path.GetExtension(metadata.Name).ToLowerInvariant();
+		if (!string.IsNullOrWhiteSpace(fromName)) {
+			return fromName;
+		}
+
+		return ".dat";
+	}
+
+	private static SourceHashes ComputeSourceHashes(ReadOnlySpan<byte> payload) {
+		return new SourceHashes(
+			ComputeCrc32Hex(payload),
+			Convert.ToHexString(MD5.HashData(payload)).ToLowerInvariant(),
+			Convert.ToHexString(SHA1.HashData(payload)).ToLowerInvariant(),
+			Convert.ToHexString(SHA256.HashData(payload)).ToLowerInvariant());
+	}
+
+	private static string ComputeCrc32Hex(ReadOnlySpan<byte> payload) {
+		uint crc = 0xffffffff;
+		foreach (var b in payload) {
+			var index = (int)((crc ^ b) & 0xff);
+			crc = (crc >> 8) ^ Crc32Table[index];
+		}
+
+		crc ^= 0xffffffff;
+		return crc.ToString("x8");
+	}
+
+	private static uint[] BuildCrc32Table() {
+		const uint polynomial = 0xedb88320u;
+		var table = new uint[256];
+
+		for (var i = 0; i < table.Length; i++) {
+			uint value = (uint)i;
+			for (var bit = 0; bit < 8; bit++) {
+				value = (value & 1) == 1 ? (value >> 1) ^ polynomial : value >> 1;
+			}
+
+			table[i] = value;
+		}
+
+		return table;
+	}
+
+	private sealed record SavedSourceArtifact(
+		string FullPath,
+		string FileName,
+		long Size,
+		DateTimeOffset CreatedUtc,
+		DateTimeOffset ModifiedUtc);
+
+	private sealed record SourceHashes(string Crc32, string Md5, string Sha1, string Sha256);
 
 	private IReadOnlyList<DatMetadata> ApplyRunControls(IReadOnlyList<DatMetadata> discovered) {
 		IEnumerable<DatMetadata> query = discovered;

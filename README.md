@@ -4,6 +4,8 @@ SeedLists is a JSON-first .NET 10 ingestion and normalization toolkit for ROM DA
 
 It is designed to turn mixed provider inputs (local DAT files, local archives, and optional remote provider payloads) into a consistent canonical JSON catalog format, then validate, parse, and persist operator-friendly run artifacts.
 
+SeedLists also persists successful ingestion records into SQLite, including source file metadata, basic hashes, and normalized catalog payloads.
+
 ## What SeedLists Does With Your Data
 
 For each provider sync run, SeedLists:
@@ -66,6 +68,7 @@ Use these options to auto-discover and auto-download only changed remote DAT sou
 - `SeedListsDat:EnableInternetDownloads`: enables remote provider discovery/download behavior
 - `SeedListsDat:EnableRemoteVersionChecks`: enables remote token/signature change detection
 - `SeedListsDat:RemotePollIntervalHours`: minimum poll interval per provider
+- `SeedListsDat:IngestionDatabasePath`: SQLite ledger location for ingestion records and normalized catalog content
 - `SeedListsDat:MameRemoteIndexUrl`: MAME remote index page
 - `SeedListsDat:MessRemoteIndexUrl`: MESS remote index page
 - `SeedListsDat:RedumpRemoteIndexUrl`: Redump remote index page
@@ -89,6 +92,8 @@ Use these options to auto-discover and auto-download only changed remote DAT sou
 - Canonical normalized payloads: `{OutputDirectory}/{provider}/{name}.dat`
 - Parsed summaries: `{OutputDirectory}/{provider}/{name}.summary.json`
 - Run manifests: `{OutputDirectory}/{provider}/run-manifests/*.json`
+- Ingestion source hierarchy: `{OutputDirectory}/{provider}/ingested-sources/{system}/{yyyy}/{MM}/{dd}/`
+- SQLite ingestion ledger: `{OutputDirectory}/{IngestionDatabasePath}` (or configured absolute path)
 
 ## Script Entry Points
 
@@ -115,6 +120,7 @@ Primary operator paths:
 - `docs/INGESTION_RUNBOOK.md`
 - `docs/SYNC_MANIFESTS.md`
 - `docs/BOUNDED_SYNC_CONTROLS.md`
+- `docs/INGESTION_DATABASE.md`
 
 Quality automation scripts:
 
