@@ -15,16 +15,21 @@ public sealed class PleasureDomeProviderTests {
 			EnableRemoteVersionChecks = false,
 			PleasureDomeMameIndexUrl = "https://pleasuredome.github.io/pleasuredome/mame/index.html",
 			PleasureDomeNonMameIndexUrl = "https://pleasuredome.github.io/pleasuredome/nonmame/index.html",
-			PleasureDomeNonMameCategorySlugs = ["fruitmachines", "pinball", "raine"],
+			PleasureDomeNonMameCategorySlugs = ["demul", "fbneo", "fruitmachines", "hbmame", "kawaks", "pinball", "pinmame", "raine"],
 		}, stateStore, BuildPleasureDomeHttpClientFactory());
 
 		var results = await provider.ListAvailableAsync();
 
-		Assert.Equal(4, results.Count);
+		Assert.Equal(9, results.Count);
 		Assert.All(results, item => Assert.StartsWith("remote|", item.Identifier, StringComparison.OrdinalIgnoreCase));
 		Assert.Contains(results, item => item.System == "MAME" && item.Name.Contains("MAME 0.286 ROMs", StringComparison.Ordinal));
+		Assert.Contains(results, item => item.System == "Demul");
+		Assert.Contains(results, item => item.System == "FinalBurn Neo");
 		Assert.Contains(results, item => item.System == "Fruit Machines");
+		Assert.Contains(results, item => item.System == "HBMAME");
+		Assert.Contains(results, item => item.System == "Kawaks");
 		Assert.Contains(results, item => item.System == "Pinball");
+		Assert.Contains(results, item => item.System == "PinMAME");
 		Assert.Contains(results, item => item.System == "Raine");
 	}
 
@@ -113,10 +118,26 @@ public sealed class PleasureDomeProviderTests {
 
 		var nonMamePage = """
 			<html>
-				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html">Fruit</a>
-				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/pinball/index.html">Pinball</a>
-				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/raine/index.html">Raine</a>
 				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/demul/index.html">Demul</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/fbneo/index.html">FBNeo</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html">Fruit</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html">HBMAME</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/kawaks/index.html">Kawaks</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/pinball/index.html">Pinball</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/pinmame/index.html">PinMAME</a>
+				<a href="https://pleasuredome.github.io/pleasuredome/nonmame/raine/index.html">Raine</a>
+			</html>
+			""";
+
+		var demulPage = """
+			<html>
+				Datfile: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/demul/Demul-2026-02-01.zip">Demul</a>
+			</html>
+			""";
+
+		var fbNeoPage = """
+			<html>
+				Datfile: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/fbneo/FBNeo-2026-02-01.zip">FBNeo</a>
 			</html>
 			""";
 
@@ -126,9 +147,27 @@ public sealed class PleasureDomeProviderTests {
 			</html>
 			""";
 
+		var hbmamePage = """
+			<html>
+				Datfile: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/hbmame/HBMAME-2026-02-01.zip">HBMAME</a>
+			</html>
+			""";
+
+		var kawaksPage = """
+			<html>
+				Datfile: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/kawaks/Kawaks-1.65.zip">Kawaks</a>
+			</html>
+			""";
+
 		var pinballPage = """
 			<html>
 				Datfiles: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/pinball/Visual%20Pinball%20(2026-01-02).zip">Visual Pinball</a>
+			</html>
+			""";
+
+		var pinMamePage = """
+			<html>
+				Datfile: <a href="https://github.com/pleasuredome/pleasuredome/raw/gh-pages/nonmame/pinmame/PinMAME-2026-01-15.zip">PinMAME</a>
 			</html>
 			""";
 
@@ -150,12 +189,32 @@ public sealed class PleasureDomeProviderTests {
 				return HtmlResponse(nonMamePage);
 			}
 
+			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/demul/index.html", StringComparison.OrdinalIgnoreCase)) {
+				return HtmlResponse(demulPage);
+			}
+
+			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/fbneo/index.html", StringComparison.OrdinalIgnoreCase)) {
+				return HtmlResponse(fbNeoPage);
+			}
+
 			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/fruitmachines/index.html", StringComparison.OrdinalIgnoreCase)) {
 				return HtmlResponse(fruitPage);
 			}
 
+			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/hbmame/index.html", StringComparison.OrdinalIgnoreCase)) {
+				return HtmlResponse(hbmamePage);
+			}
+
+			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/kawaks/index.html", StringComparison.OrdinalIgnoreCase)) {
+				return HtmlResponse(kawaksPage);
+			}
+
 			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/pinball/index.html", StringComparison.OrdinalIgnoreCase)) {
 				return HtmlResponse(pinballPage);
+			}
+
+			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/pinmame/index.html", StringComparison.OrdinalIgnoreCase)) {
+				return HtmlResponse(pinMamePage);
 			}
 
 			if (string.Equals(url, "https://pleasuredome.github.io/pleasuredome/nonmame/raine/index.html", StringComparison.OrdinalIgnoreCase)) {

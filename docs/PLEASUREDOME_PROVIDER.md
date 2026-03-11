@@ -1,6 +1,6 @@
 # PleasureDome Provider
 
-Issues: `#33`, `#34`, `#35`, `#36`, `#37`
+Issues: `#33`, `#34`, `#35`, `#36`, `#37`, `#48`, `#49`, `#50`, `#51`
 
 This document describes how SeedLists discovers and ingests DAT files from Pleasuredome.
 
@@ -23,7 +23,7 @@ Add or override the following `SeedListsDat` settings:
     "PleasureDomeLocalDirectory": "C:\\~reference-roms\\dats\\pleasuredome",
     "PleasureDomeMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/mame/index.html",
     "PleasureDomeNonMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/nonmame/index.html",
-    "PleasureDomeNonMameCategorySlugs": ["fruitmachines", "pinball", "raine"],
+    "PleasureDomeNonMameCategorySlugs": ["demul", "fbneo", "fruitmachines", "hbmame", "kawaks", "pinball", "pinmame", "raine"],
     "EnableInternetDownloads": true,
     "EnableRemoteVersionChecks": true,
     "RemotePollIntervalHours": 24
@@ -63,10 +63,41 @@ Add or override the following `SeedListsDat` settings:
 
 Default NonMAME mappings:
 
+- `demul` -> `Demul`
+- `fbneo` -> `FinalBurn Neo`
 - `fruitmachines` -> `Fruit Machines`
+- `hbmame` -> `HBMAME`
+- `kawaks` -> `Kawaks`
 - `pinball` -> `Pinball`
+- `pinmame` -> `PinMAME`
 - `raine` -> `Raine`
 - `mame` -> `MAME`
+
+Discovered Pleasuredome NonMAME categories currently include:
+
+- `demul`
+- `fbneo`
+- `fruitmachines`
+- `hbmame`
+- `kawaks`
+- `pinball`
+- `pinmame`
+- `raine`
+
+## Scripted DAT Downloads
+
+Use the downloader script to fetch DAT ZIP assets from MAME and selected NonMAME categories:
+
+```powershell
+& ".\scripts\download-pleasuredome-dats.ps1" -OutputPath "C:\~reference-roms\dats\pleasuredome-remote" -MaxDownloadsPerCategory 1
+```
+
+Helpful switches:
+
+- `-CategorySlugs` to limit categories
+- `-SkipMame` to only download NonMAME categories
+- `-SkipExisting` to avoid re-downloading existing files
+- `-MaxDownloadsPerCategory` to keep runs bounded
 
 ## Troubleshooting
 

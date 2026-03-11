@@ -31,7 +31,7 @@ public sealed class SeedListsDatOptions {
 	public string RedumpRemoteIndexUrl { get; set; } = "https://www.redump.org/downloads/";
 	public string PleasureDomeMameIndexUrl { get; set; } = "https://pleasuredome.github.io/pleasuredome/mame/index.html";
 	public string PleasureDomeNonMameIndexUrl { get; set; } = "https://pleasuredome.github.io/pleasuredome/nonmame/index.html";
-	public string[] PleasureDomeNonMameCategorySlugs { get; set; } = ["fruitmachines", "pinball", "raine"];
+	public string[] PleasureDomeNonMameCategorySlugs { get; set; } = ["demul", "fbneo", "fruitmachines", "hbmame", "kawaks", "pinball", "pinmame", "raine"];
 	public string[] GoodToolsRemoteDatUrls { get; set; } = ["https://archive.org/download/GoodTools.Collection.2025.04.10.RomVault/%21Support%20files/Goodinfo.cfg%20%28all%20dumps%20enabled%29.zip"];
 	public string[] RedumpRemoteDatUrls { get; set; } = [];
 	public string[] FruitMachineRemoteDatUrls { get; set; } = [];

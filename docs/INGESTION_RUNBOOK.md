@@ -1,6 +1,6 @@
 # Ingestion Runbook
 
-Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`, `#38`, `#39`, `#40`, `#41`, `#43`, `#44`, `#45`, `#46`, `#47`
+Issues: `#10`, `#25`, `#30`, `#31`, `#32`, `#33`, `#34`, `#35`, `#38`, `#39`, `#40`, `#41`, `#43`, `#44`, `#45`, `#46`, `#47`, `#48`, `#49`, `#50`, `#51`
 
 ## Documentation Context
 
@@ -44,7 +44,7 @@ Start in local-first mode and expand gradually:
     "RedumpRemoteIndexUrl": "https://www.redump.org/downloads/",
     "PleasureDomeMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/mame/index.html",
     "PleasureDomeNonMameIndexUrl": "https://pleasuredome.github.io/pleasuredome/nonmame/index.html",
-    "PleasureDomeNonMameCategorySlugs": ["fruitmachines", "pinball", "raine"],
+    "PleasureDomeNonMameCategorySlugs": ["demul", "fbneo", "fruitmachines", "hbmame", "kawaks", "pinball", "pinmame", "raine"],
     "GoodToolsRemoteDatUrls": [],
     "RedumpRemoteDatUrls": [],
     "FruitMachineRemoteDatUrls": [],
@@ -100,6 +100,7 @@ No-Intro policy details: `NOINTRO_COOLDOWN_POLICY.md`
 - TOSEC pull: `scripts/download-tosec-dats.ps1`
 - GoodTools local collection: `scripts/download-goodtools-dats.ps1`
 - No-Intro guarded pull: `scripts/download-nointro-dats.ps1`
+- PleasureDome remote DAT ZIP pull: `scripts/download-pleasuredome-dats.ps1`
 
 Provider behavior references:
 
@@ -135,21 +136,10 @@ Provider behavior references:
 ## Remote Auto-Downloader Operation
 
 1. Enable remote mode with `SeedListsDat:EnableInternetDownloads = true`.
-2. Keep `SeedListsDat:EnableRemoteVersionChecks = true` for token-based change detection.
-3. Tune `SeedListsDat:RemotePollIntervalHours` to set minimum polling cadence per provider.
-4. Configure remote indexes/URL lists:
-
-  - `MameRemoteIndexUrl`
-  - `MessRemoteIndexUrl`
-  - `RedumpRemoteIndexUrl`
-  - `PleasureDomeMameIndexUrl`
-  - `PleasureDomeNonMameIndexUrl`
-  - `PleasureDomeNonMameCategorySlugs`
-  - `GoodToolsRemoteDatUrls`
-  - `RedumpRemoteDatUrls`
-  - `FruitMachineRemoteDatUrls`
-
-5. Run worker cycles and validate `run-manifests` to confirm only changed remote entries are being processed.
+1. Keep `SeedListsDat:EnableRemoteVersionChecks = true` for token-based change detection.
+1. Tune `SeedListsDat:RemotePollIntervalHours` to set minimum polling cadence per provider.
+1. Configure remote indexes/URL lists: `MameRemoteIndexUrl`, `MessRemoteIndexUrl`, `RedumpRemoteIndexUrl`, `PleasureDomeMameIndexUrl`, `PleasureDomeNonMameIndexUrl`, `PleasureDomeNonMameCategorySlugs`, `GoodToolsRemoteDatUrls`, `RedumpRemoteDatUrls`, and `FruitMachineRemoteDatUrls`.
+1. Run worker cycles and validate `run-manifests` to confirm only changed remote entries are being processed.
 
 ## Understanding Run Outputs
 

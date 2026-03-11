@@ -74,7 +74,7 @@ Use these options to auto-discover and auto-download only changed remote DAT sou
 - `SeedListsDat:RedumpRemoteIndexUrl`: Redump remote index page
 - `SeedListsDat:PleasureDomeMameIndexUrl`: Pleasuredome MAME DAT page
 - `SeedListsDat:PleasureDomeNonMameIndexUrl`: Pleasuredome NonMAME category index page
-- `SeedListsDat:PleasureDomeNonMameCategorySlugs`: NonMAME categories to include (for example `fruitmachines`, `pinball`, `raine`)
+- `SeedListsDat:PleasureDomeNonMameCategorySlugs`: NonMAME categories to include (for example `demul`, `fbneo`, `fruitmachines`, `hbmame`, `kawaks`, `pinball`, `pinmame`, `raine`)
 - `SeedListsDat:GoodToolsRemoteDatUrls`: direct GoodTools DAT/ZIP URLs
 - `SeedListsDat:RedumpRemoteDatUrls`: fallback direct Redump DAT/ZIP URLs
 - `SeedListsDat:FruitMachineRemoteDatUrls`: optional fruit-machine DAT/ZIP URLs staged via include patterns
@@ -100,6 +100,7 @@ Use these options to auto-discover and auto-download only changed remote DAT sou
 - `scripts/download-tosec-dats.ps1`
 - `scripts/download-goodtools-dats.ps1`
 - `scripts/download-nointro-dats.ps1`
+- `scripts/download-pleasuredome-dats.ps1`
 - `scripts/test-markdown-policy.ps1`
 - `scripts/benchmark-markdown-policy.ps1`
 

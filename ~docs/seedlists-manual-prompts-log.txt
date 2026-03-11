@@ -33,6 +33,7 @@ No, I want auto-downloaders for MAME/MESS/Redump/fruit-machine/others like tosec
 
 [SeedLists] implement all issues and make new issues; continue;
 
+[SeedLists] implement all issues and make new issues; continue; what other dats are out there on the internet? find them and download them, making issues, etc; continue;
 
 
 

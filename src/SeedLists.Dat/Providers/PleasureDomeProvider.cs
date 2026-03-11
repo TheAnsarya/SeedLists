@@ -227,8 +227,13 @@ public sealed partial class PleasureDomeProvider(
 	private static string MapSystemName(string categorySlug) {
 		return categorySlug.Trim().ToLowerInvariant() switch {
 			"mame" => "MAME",
+			"demul" => "Demul",
+			"fbneo" => "FinalBurn Neo",
 			"fruitmachines" => "Fruit Machines",
+			"hbmame" => "HBMAME",
+			"kawaks" => "Kawaks",
 			"pinball" => "Pinball",
+			"pinmame" => "PinMAME",
 			"raine" => "Raine",
 			_ => categorySlug,
 		};
