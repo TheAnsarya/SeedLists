@@ -19,3 +19,4 @@ Thumbs.db
 # Local runtime state
 *.db
 *.log
+artifacts/
