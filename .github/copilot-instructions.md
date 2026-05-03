@@ -69,3 +69,7 @@ Primary goals:
 	- `dotnet test tests/SeedLists.Dat.Tests/SeedLists.Dat.Tests.csproj -c Release --filter "CatalogNormalizationServiceTests|DatCollectionServiceRunControlsTests"`
 - Run normalization benchmark coverage (including sliced-span JSON passthrough):
 	- `dotnet run --project benchmarks/SeedLists.Benchmarks/SeedLists.Benchmarks.csproj -c Release -- --filter "*CatalogNormalizationBenchmark*" --job short`
+
+## Session Wrap-Up Directive
+
+- Always end every Copilot session response with concise, actionable suggestions for what to work on next.
